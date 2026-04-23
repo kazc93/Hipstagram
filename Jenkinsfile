@@ -162,7 +162,7 @@ pipeline {
             }
         }
 
-        // 9. Deploy al EC2 con docker-compose
+        // 9. Deploy al EC2 con docker run (sin docker-compose)
         stage('Deploy to EC2') {
             steps {
                 withCredentials([[
@@ -173,19 +173,39 @@ pipeline {
                         aws ecr get-login-password --region ${AWS_REGION} \
                           | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
-                        # Detener y eliminar contenedores anteriores
-                        docker stop hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service || true
-                        docker rm   hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service || true
+                        # 1. Detener y eliminar contenedores anteriores (incluyendo la db)
+                        docker stop hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
+                        docker rm   hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
 
-                        # Pull de las nuevas imágenes
+                        # 2. Pull de las nuevas imágenes
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
 
-                        # Levantar microservicios con docker-compose
-                        cp /etc/hipstagram.env .env && docker-compose up -d db auth-service post-service search-service admin-service gateway
+                        # 3. Crear red interna de Docker
+                        docker network create hipstagram-network || true
+
+                        # 4. Levantar la Base de Datos
+                        docker run -d --name db \\
+                          --network hipstagram-network \\
+                          -e POSTGRES_USER=hipstagram_user \\
+                          -e POSTGRES_PASSWORD=hipstagram_pass \\
+                          -e POSTGRES_DB=hipstagram_db \\
+                          postgres:15-alpine
+
+                        # Dar tiempo a la DB para arrancar
+                        sleep 10
+
+                        # 5. Levantar microservicios inyectando las variables de entorno
+                        docker run -d --name hipstagram-auth-service --network hipstagram-network --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
+                        docker run -d --name hipstagram-post-service --network hipstagram-network --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
+                        docker run -d --name hipstagram-search-service --network hipstagram-network --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
+                        docker run -d --name hipstagram-admin-service --network hipstagram-network --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
+
+                        # 6. Levantar Gateway y exponer puerto 3000
+                        docker run -d --name hipstagram-gateway --network hipstagram-network -p 3000:80 ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
 
                         echo "Smoke test..."
                         sleep 8
