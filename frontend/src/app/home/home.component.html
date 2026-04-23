@@ -65,4 +65,50 @@
       </div>
 
       <div class="post-hashtags" *ngIf="post.hashtags?.length">
-        <span class="hashtag" *ngFor="let tag of post.hashtags">#{{ tag }}
+        <span class="hashtag" *ngFor="let tag of post.hashtags">#{{ tag }}</span>
+      </div>
+
+      <!-- ── Sección de comentarios ── -->
+      <div class="comentarios-section" *ngIf="comentariosAbiertos[post.id_post]">
+
+        <div *ngIf="!comentarios[post.id_post] || comentarios[post.id_post].length === 0"
+             style="font-size:13px; color:var(--text-muted); padding:6px 0;">
+          Aún no hay comentarios. ¡Sé el primero!
+        </div>
+
+        <div class="comentario" *ngFor="let c of comentarios[post.id_post]">
+          <span class="comentario-user">@{{ c.username }}</span>
+          <span class="comentario-texto">{{ c.contenido }}</span>
+          <button class="btn-eliminar-comentario"
+            *ngIf="usuarioActual && (usuarioActual.username === c.username || usuarioActual.rol === 'ADMIN')"
+            (click)="eliminarComentario(post.id_post, c.id_comentario)">
+            <span class="material-icons">delete</span>
+          </button>
+        </div>
+
+        <div class="nuevo-comentario">
+          <input
+            class="input-comentario"
+            type="text"
+            [(ngModel)]="nuevoComentario[post.id_post]"
+            placeholder="Escribe un comentario..."
+            (keyup.enter)="enviarComentario(post.id_post)"
+            maxlength="500"
+          />
+          <button class="btn-enviar" (click)="enviarComentario(post.id_post)">
+            <span class="material-icons">send</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="cargar-mas" *ngIf="page < totalPages">
+    <button (click)="cargarMas()" [disabled]="cargandoMas">
+      {{ cargandoMas ? 'Cargando...' : 'Cargar más' }}
+    </button>
+  </div>
+
+</div>
