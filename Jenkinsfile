@@ -162,54 +162,53 @@ pipeline {
             }
         }
 
-        // 9. Deploy al EC2 
+        // 9. Deploy al EC2
         stage('Deploy to EC2') {
             steps {
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
                     credentialsId: 'aws-credentials'
                 ]]) {
+                    // 1. Login a ECR (necesita interpolacion Groovy para las variables)
                     sh """
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                    """
 
-                        # 1. Detener y eliminar TODO para liberar el puerto 3000
-                        docker stop  hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
-                        docker rm    hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
-                        docker network prune -f || true
-                        sleep 2
+                    // 2. Matar TODOS los contenedores (incluye versiones anteriores de docker-compose)
+                    //    sh '...' de comilla simple evita que Groovy interprete el $(...) de shell
+                    sh 'docker stop $(docker ps -aq) 2>/dev/null || true'
+                    sh 'docker rm -f $(docker ps -aq) 2>/dev/null || true'
+                    sh 'docker network prune -f || true'
+                    sh 'fuser -k 3000/tcp 2>/dev/null || true'
+                    sh 'sleep 2'
 
-                        # 2. Pull de las nuevas imágenes
+                    // 3. Pull e iniciar microservicios
+                    sh """
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
 
-                        # 3. Crear red interna de Docker
                         docker network create hipstagram-network || true
 
-                        # 4. Levantar la Base de Datos (Limitada a 256MB)
-                        docker run -d --name db \\
-                          --network hipstagram-network \\
-                          --memory="256m" \\
-                          -e POSTGRES_USER=hipstagram_user \\
-                          -e POSTGRES_PASSWORD=hipstagram_pass \\
-                          -e POSTGRES_DB=hipstagram_db \\
+                        docker run -d --name db \
+                          --network hipstagram-network \
+                          --memory=256m \
+                          -e POSTGRES_USER=hipstagram_user \
+                          -e POSTGRES_PASSWORD=hipstagram_pass \
+                          -e POSTGRES_DB=hipstagram_db \
                           postgres:15-alpine
 
-                        # Dar tiempo a la DB para arrancar
                         sleep 10
 
-                        # 5. Levantar microservicios inyectando las variables (Limitados a 128MB)
-                        docker run -d --name hipstagram-auth-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
-                        docker run -d --name hipstagram-post-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
-                        docker run -d --name hipstagram-search-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
-                        docker run -d --name hipstagram-admin-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
+                        docker run -d --name hipstagram-auth-service --network hipstagram-network --memory=128m --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
+                        docker run -d --name hipstagram-post-service --network hipstagram-network --memory=128m --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
+                        docker run -d --name hipstagram-search-service --network hipstagram-network --memory=128m --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
+                        docker run -d --name hipstagram-admin-service --network hipstagram-network --memory=128m --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
 
-                        # 6. Levantar Gateway y exponer puerto 3000 (Limitado a 64MB)
-                        docker run -d --name hipstagram-gateway --network hipstagram-network --memory="64m" -p 3000:80 ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
+                        docker run -d --name hipstagram-gateway --network hipstagram-network --memory=64m -p 3000:80 ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
 
-                        echo "Smoke test..."
                         sleep 8
                         curl -sf http://localhost:3000/api/health && echo "Health check OK" || echo "Health check no responde (continua de todas formas)"
                     """
