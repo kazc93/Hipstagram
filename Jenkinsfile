@@ -173,10 +173,9 @@ pipeline {
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
                         # 1. Detener y eliminar TODO para liberar el puerto 3000
-                        docker stop hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
-                        docker rm -f \\$(docker ps -aq) || true
+                        docker stop  hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
+                        docker rm    hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
                         docker network prune -f || true
-                        fuser -k 3000/tcp || true
                         sleep 2
 
                         # 2. Pull de las nuevas imágenes
