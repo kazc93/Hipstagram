@@ -162,7 +162,7 @@ pipeline {
             }
         }
 
-        // 9. Deploy al EC2 con docker run
+        // 9. Deploy al EC2 
         stage('Deploy to EC2') {
             steps {
                 withCredentials([[
@@ -173,9 +173,13 @@ pipeline {
                         aws ecr get-login-password --region ${AWS_REGION} \
                           | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
-                        # 1. Detener y eliminar contenedores anteriores (incluyendo la db)
+                        # 1. Detener y eliminar TODO para liberar el puerto 3000
                         docker stop hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
-                        docker rm   hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
+                        docker rm -f \\$(docker ps -aq) || true
+                        docker network prune -f || true
+                        # Liberar puerto 3000 si algún proceso ajeno lo ocupa
+                        fuser -k 3000/tcp 2>/dev/null || true
+                        sleep 2
 
                         # 2. Pull de las nuevas imágenes
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
@@ -199,7 +203,7 @@ pipeline {
                         # Dar tiempo a la DB para arrancar
                         sleep 10
 
-                        # 5. Levantar microservicios inyectando las variables de entorno (Limitados a 128MB c/u)
+                        # 5. Levantar microservicios inyectando las variables (Limitados a 128MB)
                         docker run -d --name hipstagram-auth-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
                         docker run -d --name hipstagram-post-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
                         docker run -d --name hipstagram-search-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
