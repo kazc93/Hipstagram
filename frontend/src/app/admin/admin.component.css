@@ -1,0 +1,302 @@
+.admin-container {
+  max-width: 1100px;
+  margin: 80px auto 40px;
+  padding: 24px 20px;
+}
+
+/* ─── Header ──────────────────────────────────────── */
+.admin-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-icon {
+  font-size: 40px;
+  color: var(--text-soft);
+}
+
+.admin-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.admin-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ─── Mensaje éxito ───────────────────────────────── */
+.mensaje {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--success-bg);
+  color: var(--success);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  font-size: 14px;
+  border: 1px solid rgba(22,163,74,0.20);
+}
+
+/* ─── Tabs ────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tabs button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 20px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all .2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.tabs button .material-icons { font-size: 17px; }
+
+.tabs button:hover {
+  border-color: var(--text-muted);
+  color: var(--text-soft);
+}
+
+.tabs button.active {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border-color: var(--button-bg);
+  box-shadow: var(--shadow);
+}
+
+/* ─── Tabla ───────────────────────────────────────── */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.tabla thead { background: var(--surface-2); }
+
+.tabla th {
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.tabla td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td { border-bottom: none; }
+.tabla tbody tr:hover { background: var(--surface-2); }
+
+.col-id    { color: var(--text-muted); font-size: 12px; }
+.col-email { color: var(--text-soft); }
+.col-desc  { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col-fecha { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+.col-entidad { color: var(--text-muted); font-size: 12px; }
+
+/* ─── Badges ──────────────────────────────────────── */
+.badge-activo,
+.badge-bloqueado,
+.badge-admin,
+.badge-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-activo   { background: var(--success-bg);  color: var(--success); }
+.badge-bloqueado{ background: var(--like-bg);      color: var(--like); }
+.badge-admin    { background: rgba(138,43,226,0.12); color: #a855f7; }
+.badge-user     { background: var(--dislike-bg);   color: var(--dislike); }
+
+.badge-icon { font-size: 13px; }
+
+/* ─── Likes ───────────────────────────────────────── */
+.likes-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--like);
+  font-weight: 600;
+}
+
+.likes-count .material-icons { font-size: 15px; }
+
+/* ─── Código de acción ────────────────────────────── */
+.action-code {
+  background: var(--surface-2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-soft);
+  border: 1px solid var(--border-soft);
+}
+
+/* ─── Botones de acción ───────────────────────────── */
+.btn-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-soft);
+  transition: all .2s;
+}
+
+.btn-accion .material-icons { font-size: 15px; }
+.btn-bloquear:hover { border-color: var(--like);    color: var(--like);    background: var(--like-bg); }
+.btn-activar:hover  { border-color: var(--success); color: var(--success); background: var(--success-bg); }
+
+.acciones-post { display: flex; gap: 6px; }
+
+.btn-verde,
+.btn-rojo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: opacity .2s;
+}
+
+.btn-verde .material-icons,
+.btn-rojo  .material-icons { font-size: 14px; }
+
+.btn-verde { background: var(--success-bg); color: var(--success); }
+.btn-verde:hover { opacity: .75; }
+.btn-rojo  { background: var(--like-bg);    color: var(--like); }
+.btn-rojo:hover  { opacity: .75; }
+
+.filtros-estado {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filtros-estado button {
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all .2s;
+}
+
+.filtros-estado button:hover { background: var(--bg-secondary); }
+.filtros-estado button.active { background: var(--text-primary); color: var(--bg-primary); border-color: var(--text-primary); }
+
+/* ─── Hashtag form ────────────────────────────────── */
+.hashtag-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hashtag-input {
+  flex: 1;
+  max-width: 320px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.hashtag-input:focus { border-color: var(--button-bg); }
+
+.col-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 24px !important;
+  font-size: 13px;
+}
+
+/* ─── Filtros audit log ───────────────────────────── */
+.filtros-logs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.filtro-select,
+.filtro-input {
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.filtro-select:focus,
+.filtro-input:focus { border-color: var(--button-bg); }
+
+.filtro-input[type="date"] { color: var(--text-muted); }
+
+.btn-limpiar {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-limpiar:hover { border-color: var(--like); color: var(--like); background: var(--like-bg); }
+.btn-limpiar .material-icons { font-size: 17px; }

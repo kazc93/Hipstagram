@@ -1,0 +1,18 @@
+# Dependencias
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Docker
+postgres_data/
+
+# Angular
+.angular/
+dist/
+
+# Secretos
+.env
+
+# MacOS
+.DS_Store
+.claude/

@@ -1,0 +1,47 @@
+<div class="login-container">
+  <div class="login-card">
+
+    <h1 class="branding-title">Hipstagram</h1>
+    <p class="branding-sub">Crea tu cuenta y empieza a compartir</p>
+
+    <div class="input-wrapper">
+      <input type="text"
+             placeholder="Nombre completo"
+             [(ngModel)]="nuevoUsuario.nombre_completo"
+             name="nombre" />
+      <span class="material-icons">badge</span>
+    </div>
+
+    <div class="input-wrapper">
+      <input type="email"
+             placeholder="Correo electrónico"
+             [(ngModel)]="nuevoUsuario.email"
+             name="email" />
+      <span class="material-icons">email</span>
+    </div>
+
+    <div class="input-wrapper">
+      <input type="text"
+             placeholder="Nombre de usuario"
+             [(ngModel)]="nuevoUsuario.username"
+             name="username" />
+      <span class="material-icons">alternate_email</span>
+    </div>
+
+    <div class="input-wrapper">
+      <input type="password"
+             placeholder="Contraseña"
+             [(ngModel)]="nuevoUsuario.password"
+             name="password"
+             (keyup.enter)="registrar()" />
+      <span class="material-icons">lock</span>
+    </div>
+
+    <button class="btn-login" (click)="registrar()">Crear cuenta</button>
+
+    <div class="footer-links">
+      <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,68 @@
+<app-navbar></app-navbar>
+
+<div class="feed-container">
+  <app-crear-post (postCreado)="cargarFeed()"></app-crear-post>
+
+  <div class="toast-error" *ngIf="mensajeAccion">
+    <span class="material-icons">warning</span>
+    {{ mensajeAccion }}
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    <span class="material-icons spin">autorenew</span>
+    <p>Cargando feed...</p>
+  </div>
+  <div *ngIf="error" class="error">
+    <span class="material-icons">error_outline</span>
+    <p>{{ error }}</p>
+  </div>
+  
+  <div *ngIf="!cargando && posts.length === 0" class="empty">
+    <span class="material-icons">photo_camera</span>
+    <p>No hay posts todavía. ¡Sé el primero en publicar!</p>
+  </div>
+
+  <div class="posts-list">
+    <div class="post-card" *ngFor="let post of posts">
+
+      <div class="post-header">
+        <div class="avatar-circle">{{ (post.username ? post.username[0] : 'U') | uppercase }}</div>
+        <div class="post-header-info">
+          <span class="username">@{{ post.username || 'Usuario' }}</span>
+          <span class="fecha">{{ post.fecha_creacion | date:'dd/MM/yyyy · HH:mm' }}</span>
+        </div>
+      </div>
+
+      <div class="post-imagen placeholder" *ngIf="!post.url_imagen">
+        <span class="material-icons">image_not_supported</span>
+        <span>Sin imagen</span>
+      </div>
+      <div class="post-imagen" *ngIf="post.url_imagen">
+        <img [src]="imgUrl(post.url_imagen)" alt="foto">
+      </div>
+
+      <div class="post-acciones">
+        <button class="btn-like" (click)="votar(post.id_post, 'like')">
+          <span class="material-icons">favorite</span>
+          {{ post.total_likes }}
+        </button>
+        <button class="btn-dislike" (click)="votar(post.id_post, 'dislike')">
+          <span class="material-icons">thumb_down</span>
+          {{ post.total_dislikes }}
+        </button>
+        <button class="btn-comentar" (click)="toggleComentarios(post.id_post)">
+          <span class="material-icons">chat_bubble_outline</span>
+          Comentarios
+        </button>
+        <button class="btn-eliminar-post" *ngIf="puedeEliminar(post)" (click)="eliminarPost(post.id_post)">
+          <span class="material-icons">delete</span>
+          Eliminar
+        </button>
+      </div>
+
+      <div class="post-descripcion" *ngIf="post.descripcion">
+        <strong>@{{ post.username || 'Usuario' }}</strong> {{ post.descripcion }}
+      </div>
+
+      <div class="post-hashtags" *ngIf="post.hashtags?.length">
+        <span class="hashtag" *ngFor="let tag of post.hashtags">#{{ tag }}

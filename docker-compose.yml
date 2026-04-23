@@ -1,0 +1,50 @@
+services:
+
+  db:
+    image: postgres:15-alpine
+    container_name: hipstagram-db
+    restart: always
+    environment:
+      POSTGRES_USER:     ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB:       ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hipstagram-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_USER:      ${DB_USER}
+      DB_HOST:      db
+      DB_NAME:      ${DB_NAME}
+      DB_PASSWORD:  ${DB_PASSWORD}
+      DB_PORT:      ${DB_PORT}
+      JWT_SECRET:   ${JWT_SECRET}
+      UPLOADS_DIR:  /app/uploads
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hipstagram-frontend
+    restart: always
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

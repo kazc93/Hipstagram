@@ -1,0 +1,10 @@
+# Forzar que todos los archivos de texto usen LF (formato Linux/Mac)
+* text=auto eol=lf
+
+# Asegurar que los scripts de shell siempre sean LF
+*.sh text eol=lf
+
+# Evitar que archivos binarios (fotos, etc.) se corrompan
+*.png binary
+*.jpg binary
+*.jpeg binary

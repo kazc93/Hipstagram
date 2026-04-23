@@ -1,0 +1,82 @@
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: var(--navbar-bg);
+  border-bottom: 1px solid var(--navbar-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 1000;
+  height: 58px;
+}
+
+.navbar-container {
+  max-width: 975px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.logo {
+  font-family: 'Oleo Script', cursive;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+  margin: 0;
+  letter-spacing: .3px;
+  flex-shrink: 0;
+}
+
+/* Search */
+.search-box input {
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  font-size: 14px;
+  outline: none;
+  width: 220px;
+  background: var(--field-bg);
+  color: var(--text);
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+
+.search-box input::placeholder { color: var(--text-muted); }
+
+.search-box input:focus {
+  border-color: var(--field-focus-border);
+  background: var(--field-focus-bg);
+  box-shadow: 0 0 0 3px rgba(2,132,199,0.10);
+}
+
+/* Nav icons */
+.nav-icons {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 7px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  color: var(--text-soft);
+  transition: background .2s, color .2s;
+}
+
+.icon-btn:hover {
+  background: var(--navbar-icon-hover);
+  color: var(--text);
+}
+
+.icon-btn.logout:hover {
+  background: var(--like-bg);
+  color: var(--like);
+}

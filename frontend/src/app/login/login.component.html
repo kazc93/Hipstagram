@@ -1,0 +1,31 @@
+<div class="login-container">
+  <div class="login-card">
+
+    <h1 class="branding-title">Hipstagram</h1>
+    <p class="branding-sub">Inicia sesión para ver fotos de tus amigos</p>
+
+    <div class="input-wrapper">
+      <input type="text"
+             placeholder="Usuario o correo electrónico"
+             [(ngModel)]="credenciales.username"
+             name="username" />
+      <span class="material-icons">person</span>
+    </div>
+
+    <div class="input-wrapper">
+      <input type="password"
+             placeholder="Contraseña"
+             [(ngModel)]="credenciales.password"
+             name="password"
+             (keyup.enter)="iniciarSesion()" />
+      <span class="material-icons">lock</span>
+    </div>
+
+    <button class="btn-login" (click)="iniciarSesion()">Iniciar sesión</button>
+
+    <div class="footer-links">
+      <p>¿No tienes cuenta? <a routerLink="/registro">Regístrate</a></p>
+    </div>
+
+  </div>
+</div>

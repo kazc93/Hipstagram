@@ -1,0 +1,226 @@
+<app-navbar></app-navbar>
+
+<div class="admin-container">
+
+  <div class="admin-header">
+    <span class="material-icons admin-icon">admin_panel_settings</span>
+    <div>
+      <h2>Panel de Administración</h2>
+      <p class="admin-subtitle">Gestión de usuarios, publicaciones y auditoría</p>
+    </div>
+  </div>
+
+  <div class="mensaje" *ngIf="mensaje">
+    <span class="material-icons">check_circle</span>
+    {{ mensaje }}
+  </div>
+
+  <div class="tabs">
+    <button [class.active]="seccion === 'usuarios'" (click)="cargarUsuarios()">
+      <span class="material-icons">group</span> Usuarios
+    </button>
+    <button [class.active]="seccion === 'posts'" (click)="cargarPosts()">
+      <span class="material-icons">photo_library</span> Posts
+    </button>
+    <button [class.active]="seccion === 'hashtags'" (click)="cargarHashtagsProhibidos()">
+      <span class="material-icons">tag</span> Hashtags
+    </button>
+    <button [class.active]="seccion === 'logs'" (click)="cargarLogs()">
+      <span class="material-icons">history</span> Auditoría
+    </button>
+  </div>
+
+  <!-- USUARIOS -->
+  <div *ngIf="seccion === 'usuarios'">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of usuarios">
+          <td class="col-id">#{{ u.id_usuario }}</td>
+          <td><strong>{{ u.username }}</strong></td>
+          <td class="col-email">{{ u.email }}</td>
+          <td>
+            <span [class]="u.id_rol === 1 ? 'badge-admin' : 'badge-user'">
+              {{ u.id_rol === 1 ? 'ADMIN' : 'USER' }}
+            </span>
+          </td>
+          <td>
+            <span [class]="u.activo ? 'badge-activo' : 'badge-bloqueado'">
+              <span class="material-icons badge-icon">{{ u.activo ? 'check_circle' : 'block' }}</span>
+              {{ u.activo ? 'Activo' : 'Bloqueado' }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-accion" [class.btn-bloquear]="u.activo" [class.btn-activar]="!u.activo" (click)="bloquearUsuario(u.id_usuario, u.activo)">
+              <span class="material-icons">{{ u.activo ? 'block' : 'check_circle' }}</span>
+              {{ u.activo ? 'Bloquear' : 'Activar' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- POSTS -->
+  <div *ngIf="seccion === 'posts'">
+    <div class="filtros-estado">
+      <button [class.active]="filtroEstado === ''"          (click)="cambiarFiltroEstado('')">Todos</button>
+      <button [class.active]="filtroEstado === 'PENDIENTE'" (click)="cambiarFiltroEstado('PENDIENTE')">Pendiente</button>
+      <button [class.active]="filtroEstado === 'PUBLICADO'" (click)="cambiarFiltroEstado('PUBLICADO')">Publicado</button>
+      <button [class.active]="filtroEstado === 'BLOQUEADO'" (click)="cambiarFiltroEstado('BLOQUEADO')">Bloqueado</button>
+    </div>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Likes</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of posts">
+          <td class="col-id">#{{ p.id_post }}</td>
+          <td><strong>{{ p.username }}</strong></td>
+          <td class="col-desc">{{ p.descripcion }}</td>
+          <td>
+            <span [class]="p.estado === 'PUBLICADO' ? 'badge-activo' : 'badge-bloqueado'">
+              <span class="material-icons badge-icon">{{ p.estado === 'PUBLICADO' ? 'check_circle' : 'block' }}</span>
+              {{ p.estado }}
+            </span>
+          </td>
+          <td>
+            <span class="likes-count">
+              <span class="material-icons">favorite</span> {{ p.total_likes }}
+            </span>
+          </td>
+          <td class="acciones-post">
+            <button class="btn-verde" (click)="cambiarEstadoPost(p.id_post, 'PUBLICADO')">
+              <span class="material-icons">check</span> Publicar
+            </button>
+            <button class="btn-rojo" (click)="cambiarEstadoPost(p.id_post, 'BLOQUEADO')">
+              <span class="material-icons">block</span> Bloquear
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- HASHTAGS PROHIBIDOS -->
+  <div *ngIf="seccion === 'hashtags'">
+    <div class="hashtag-form">
+      <input
+        class="hashtag-input"
+        type="text"
+        placeholder="Nuevo hashtag (ej: spam)"
+        [(ngModel)]="nuevoHashtag"
+        (keyup.enter)="agregarHashtag()"
+      />
+      <button class="btn-verde" (click)="agregarHashtag()">
+        <span class="material-icons">add</span> Agregar
+      </button>
+    </div>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Hashtag</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of hashtagsProhibidos">
+          <td class="col-id">#{{ h.id }}</td>
+          <td><code class="action-code">#{{ h.nombre }}</code></td>
+          <td>
+            <button class="btn-rojo" (click)="eliminarHashtag(h.id, h.nombre)">
+              <span class="material-icons">delete</span> Eliminar
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="hashtagsProhibidos.length === 0">
+          <td colspan="3" class="col-empty">No hay hashtags prohibidos registrados.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AUDIT LOGS -->
+  <div *ngIf="seccion === 'logs'">
+    <div class="filtros-logs">
+      <select class="filtro-select" [(ngModel)]="filtroLogs.action" (change)="consultarLogs()">
+        <option value="">Todas las acciones</option>
+        <option value="LOGIN_SUCCESS">LOGIN_SUCCESS</option>
+        <option value="LOGIN_FAIL">LOGIN_FAIL</option>
+        <option value="POST_CREATE">POST_CREATE</option>
+        <option value="POST_DELETE">POST_DELETE</option>
+        <option value="POST_MODERATION">POST_MODERATION</option>
+        <option value="VOTE_LIKE">VOTE_LIKE</option>
+        <option value="VOTE_DISLIKE">VOTE_DISLIKE</option>
+        <option value="VOTE_CHANGE">VOTE_CHANGE</option>
+        <option value="COMMENT_CREATE">COMMENT_CREATE</option>
+        <option value="COMMENT_DELETE">COMMENT_DELETE</option>
+        <option value="ADMIN_BLOCK_USER">ADMIN_BLOCK_USER</option>
+        <option value="ADMIN_UNBLOCK_USER">ADMIN_UNBLOCK_USER</option>
+        <option value="ADMIN_APPROVE_POST">ADMIN_APPROVE_POST</option>
+        <option value="ADMIN_DELETE_POST">ADMIN_DELETE_POST</option>
+      </select>
+      <input class="filtro-input" type="text" placeholder="ID de usuario" [(ngModel)]="filtroLogs.actor_user_id" (input)="consultarLogs()" />
+      <select class="filtro-select" [(ngModel)]="filtroLogs.result" (change)="consultarLogs()">
+        <option value="">Todos los resultados</option>
+        <option value="SUCCESS">SUCCESS</option>
+        <option value="FAIL">FAIL</option>
+        <option value="BLOCKED">BLOCKED</option>
+        <option value="APPROVED">APPROVED</option>
+      </select>
+      <input class="filtro-input" type="date" [(ngModel)]="filtroLogs.desde" (change)="consultarLogs()" title="Desde" />
+      <input class="filtro-input" type="date" [(ngModel)]="filtroLogs.hasta" (change)="consultarLogs()" title="Hasta" />
+      <button class="btn-limpiar" (click)="limpiarFiltrosLogs()">
+        <span class="material-icons">filter_alt_off</span>
+      </button>
+    </div>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Usuario</th>
+          <th>Rol</th>
+          <th>Acción</th>
+          <th>Entidad</th>
+          <th>Resultado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs">
+          <td class="col-fecha">{{ log.timestamp | date:'dd/MM/yy HH:mm' }}</td>
+          <td>{{ log.username ?? ('usuario #' + log.actor_user_id) }}</td>
+          <td>
+            <span [class]="log.actor_role === 'ADMIN' ? 'badge-admin' : 'badge-user'">
+              {{ log.actor_role }}
+            </span>
+          </td>
+          <td><code class="action-code">{{ log.action }}</code></td>
+          <td class="col-entidad">{{ log.entity_type }} #{{ log.entity_id }}</td>
+          <td>
+            <span [class]="(log.resultado || log.result) === 'SUCCESS' || (log.resultado || log.result) === 'EXITOSO' ? 'badge-activo' : 'badge-bloqueado'">
+              {{ log.resultado || log.result }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

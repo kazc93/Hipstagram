@@ -1,0 +1,66 @@
+<app-navbar></app-navbar>
+
+<div class="perfil-container">
+
+  <!-- Cabecera de perfil -->
+  <div class="perfil-header">
+    <div class="avatar">{{ inicial() }}</div>
+    <div class="perfil-info">
+      <h2>{{ usuario?.nombre_completo || usuario?.username }}</h2>
+      <span class="username-label">&#64;{{ usuario?.username }}</span>
+      <span class="rol-badge" [class.admin]="usuario?.rol === 'ADMIN'">
+        {{ usuario?.rol }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Estadísticas rápidas -->
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num">{{ posts.length }}</span>
+      <span class="stat-label">publicaciones</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">{{ totalLikes() }}</span>
+      <span class="stat-label">likes totales</span>
+    </div>
+  </div>
+
+  <!-- Lista de posts -->
+  <div *ngIf="cargando" class="estado-msg">Cargando...</div>
+
+  <div *ngIf="!cargando && posts.length === 0" class="estado-msg">
+    Aún no has publicado nada.
+  </div>
+
+  <div *ngIf="!cargando && posts.length > 0" class="posts-lista">
+    <div class="post-card" *ngFor="let post of posts">
+
+      <div class="post-top">
+        <div class="post-meta">
+          <span class="fecha">{{ post.fecha_creacion | date:'dd MMM yyyy' }}</span>
+          <span class="estado-chip" [ngClass]="badgeEstado(post.estado)">{{ post.estado }}</span>
+        </div>
+        <button class="btn-eliminar" (click)="eliminarPost(post.id_post)" title="Eliminar">
+          <span class="material-icons">delete_outline</span>
+        </button>
+      </div>
+
+      <img *ngIf="post.url_imagen" [src]="imgUrl(post.url_imagen)"
+           class="post-img" alt="imagen post" />
+
+      <p class="post-desc" *ngIf="post.descripcion">{{ post.descripcion }}</p>
+
+      <div class="post-tags" *ngIf="post.hashtags?.length">
+        <span class="tag" *ngFor="let tag of post.hashtags">#{{ tag }}</span>
+      </div>
+
+      <div class="post-counts">
+        <span><span class="material-icons like-icon">favorite</span> {{ post.total_likes }}</span>
+        <span><span class="material-icons dislike-icon">thumb_down</span> {{ post.total_dislikes }}</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>

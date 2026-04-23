@@ -1,0 +1,263 @@
+:host {
+  display: block;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.crear-post-container { position: relative; }
+
+/* ─── Caja inicial ────────────────────────────────── */
+.caja-inicial {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s, border-color .2s;
+}
+
+.caja-inicial:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--text-muted);
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.btn-placeholder {
+  flex: 1;
+  border: none;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  padding: 11px 20px;
+  border-radius: var(--radius-pill);
+  text-align: left;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.btn-placeholder:hover { background: var(--field-border); }
+
+/* ─── Modal overlay ───────────────────────────────── */
+.overlay-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 1500;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ─── Card publicar ───────────────────────────────── */
+.card-publicar {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface);
+  width: 90%;
+  max-width: 600px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  animation: fadeUp .25s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translate(-50%, -46%); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.header-form {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-form h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.btn-cerrar {
+  background: var(--surface-2);
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 18px;
+  transition: background .2s, color .2s;
+}
+
+.btn-cerrar:hover {
+  background: var(--like-bg);
+  color: var(--like);
+}
+
+.mensaje-alerta {
+  padding: 10px 20px;
+  background: var(--success-bg);
+  color: var(--success);
+  font-size: 14px;
+}
+
+.mensaje-alerta.error {
+  background: var(--like-bg);
+  color: var(--like);
+}
+
+/* ─── Cuerpo del form ─────────────────────────────── */
+.cuerpo-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.preview-container {
+  width: 100%;
+  max-height: 250px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--border-soft);
+}
+
+.preview-container img {
+  max-width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+}
+
+.btn-archivo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  color: var(--text-soft);
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all .2s;
+}
+
+.btn-archivo:hover {
+  background: var(--field-border);
+  border-color: var(--text-muted);
+}
+
+.icono-foto { color: var(--text-muted); font-size: 20px; }
+
+.inputs-section textarea {
+  width: 100%;
+  border: none;
+  border-bottom: 1.5px solid var(--border-soft);
+  outline: none;
+  resize: none;
+  font-size: 15px;
+  padding: 10px 0;
+  height: 80px;
+  background: transparent;
+  color: var(--text);
+  transition: border-color .2s;
+}
+
+.inputs-section textarea::placeholder { color: var(--text-muted); }
+.inputs-section textarea:focus { border-color: var(--field-focus-border); }
+
+.hashtag-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--field-border);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  background: var(--field-bg);
+  transition: border-color .2s;
+}
+
+.hashtag-input-wrapper:focus-within { border-color: var(--field-focus-border); }
+
+.hashtag-icon { color: var(--text-muted); font-size: 1.1rem; }
+
+.hashtag-input-wrapper input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 10px 8px;
+  font-size: 14px;
+  background: transparent;
+  color: var(--text);
+}
+
+.hashtag-input-wrapper input::placeholder { color: var(--text-muted); }
+
+/* ─── Footer del form ─────────────────────────────── */
+.footer-form {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-publicar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity .2s;
+}
+
+.btn-publicar:hover:not(:disabled) { opacity: .85; }
+
+.btn-publicar:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}

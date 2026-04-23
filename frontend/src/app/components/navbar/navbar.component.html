@@ -1,0 +1,32 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <h1 class="logo" routerLink="/home">Hipstagram</h1>
+
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Buscar..."
+        [(ngModel)]="terminoBusqueda"
+        (keyup.enter)="buscar()"
+      />
+    </div>
+
+    <div class="nav-icons">
+      <button class="icon-btn" routerLink="/home" title="Inicio">
+        <span class="material-icons">home</span>
+      </button>
+      <button class="icon-btn" routerLink="/busqueda" title="Explorar">
+        <span class="material-icons">explore</span>
+      </button>
+      <button class="icon-btn" *ngIf="esAdmin()" routerLink="/admin" title="Admin">
+        <span class="material-icons">admin_panel_settings</span>
+      </button>
+      <button class="icon-btn" routerLink="/perfil" title="Mi Perfil">
+        <span class="material-icons">account_circle</span>
+      </button>
+      <button class="icon-btn logout" (click)="logout()" title="Cerrar Sesión">
+        <span class="material-icons">logout</span>
+      </button>
+    </div>
+  </div>
+</nav>

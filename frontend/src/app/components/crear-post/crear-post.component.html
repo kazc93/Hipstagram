@@ -1,0 +1,58 @@
+<div class="overlay-bg" *ngIf="mostrarForm" (click)="mostrarForm = false"></div>
+
+<div class="caja-inicial" (click)="mostrarForm = true">
+  <div class="avatar-placeholder">{{ (usuarioActual?.username?.[0] || '?') | uppercase }}</div>
+  <button class="btn-placeholder">¿Qué estás pensando?</button>
+  <span class="material-icons icono-foto">add_photo_alternate</span>
+</div>
+
+<div class="card-publicar" *ngIf="mostrarForm">
+  <div class="header-form">
+    <h3>Nueva publicación</h3>
+    <button class="btn-cerrar" (click)="mostrarForm = false">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <div class="mensaje-alerta" [class.error]="esError" *ngIf="mensaje">{{ mensaje }}</div>
+
+  <div class="cuerpo-form">
+    <div class="upload-section">
+      <div class="preview-container" *ngIf="previewUrl">
+        <img [src]="previewUrl" alt="preview">
+      </div>
+      <label class="btn-archivo">
+        <span class="material-icons">upload</span>
+        {{ imagenSeleccionada ? 'Cambiar imagen' : 'Seleccionar imagen' }}
+        <input type="file" (change)="onFileSelected($event)" accept="image/*" hidden>
+      </label>
+    </div>
+
+    <div class="inputs-section">
+      <textarea
+        [(ngModel)]="descripcion"
+        placeholder="Escribe una descripción..."
+        rows="3"
+      ></textarea>
+      <div class="hashtag-input-wrapper">
+        <span class="hashtag-icon material-icons">tag</span>
+        <input
+          type="text"
+          [(ngModel)]="hashtags"
+          placeholder="hashtags separados por espacios"
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-form">
+    <button
+      class="btn-publicar"
+      (click)="onSubmit()"
+      [disabled]="!descripcion || !imagenSeleccionada || subiendo"
+    >
+      <span class="material-icons">send</span>
+      {{ subiendo ? 'Subiendo...' : 'Publicar' }}
+    </button>
+  </div>
+</div>

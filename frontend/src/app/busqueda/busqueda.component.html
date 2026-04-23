@@ -1,0 +1,144 @@
+<app-navbar></app-navbar>
+
+<div class="busqueda-container">
+
+  <!-- Tabs principales -->
+  <div class="seccion-tabs">
+    <button [class.active]="seccion === 'buscar'" (click)="cambiarSeccion('buscar')">
+      <span class="material-icons">search</span> Buscar
+    </button>
+    <button [class.active]="seccion === 'explorar'" (click)="cambiarSeccion('explorar')">
+      <span class="material-icons">explore</span> Explorar (Top Likes)
+    </button>
+  </div>
+
+  <!-- Toast error -->
+  <div class="toast-error" *ngIf="mensajeAccion">
+    <span class="material-icons">warning</span> {{ mensajeAccion }}
+  </div>
+
+  <!-- SECCIÓN BUSCAR -->
+  <div *ngIf="seccion === 'buscar'">
+    <div class="tipo-selector">
+      <button [class.active]="tipo === 'general'" (click)="tipo = 'general'">Texto libre</button>
+      <button [class.active]="tipo === 'hashtag'" (click)="tipo = 'hashtag'">#Hashtag</button>
+    </div>
+    <div class="input-group">
+      <input
+        [(ngModel)]="termino"
+        [placeholder]="tipo === 'hashtag' ? 'Buscar por hashtag...' : 'Buscar por texto...'"
+        (keyup.enter)="buscar()"
+        class="input-busqueda"
+      />
+      <button (click)="buscar()" class="btn-buscar">
+        <span class="material-icons">search</span> Buscar
+      </button>
+    </div>
+
+    <p class="resultados-header" *ngIf="buscado">
+      {{ posts.length }} resultado(s) para "{{ termino }}"
+    </p>
+  </div>
+
+  <!-- SECCIÓN EXPLORAR -->
+  <div *ngIf="seccion === 'explorar'" class="explorar-header">
+    <span class="material-icons">star</span>
+    <div>
+      <h3>Top publicaciones</h3>
+      <p>Las fotos con más likes de la comunidad</p>
+    </div>
+  </div>
+
+  <!-- Estado cargando -->
+  <div *ngIf="buscando" class="loading">
+    <span class="material-icons spin">autorenew</span>
+    <p>{{ seccion === 'explorar' ? 'Cargando...' : 'Buscando...' }}</p>
+  </div>
+
+  <!-- Estado vacío -->
+  <div *ngIf="!buscando && buscado && posts.length === 0" class="empty">
+    <span class="material-icons">search_off</span>
+    <p>No se encontraron resultados.</p>
+  </div>
+  <div *ngIf="!buscando && seccion === 'explorar' && posts.length === 0" class="empty">
+    <span class="material-icons">photo_camera</span>
+    <p>Aún no hay publicaciones con likes.</p>
+  </div>
+
+  <!-- Lista de posts -->
+  <div class="posts-list">
+    <div class="post-card" *ngFor="let post of posts; let i = index">
+
+      <!-- Badge ranking en Explorar -->
+      <div class="ranking-badge" *ngIf="seccion === 'explorar' && i < 3">
+        <span class="material-icons">{{ i === 0 ? 'emoji_events' : 'star' }}</span>
+        #{{ i + 1 }}
+      </div>
+
+      <div class="post-header">
+        <div class="avatar-circle">{{ post.username[0] | uppercase }}</div>
+        <div class="post-header-info">
+          <span class="username">@{{ post.username }}</span>
+          <span class="fecha">{{ post.fecha_creacion | date:'dd/MM/yyyy · HH:mm' }}</span>
+        </div>
+      </div>
+
+      <div class="post-imagen placeholder" *ngIf="!post.url_imagen">
+        <span class="material-icons">image_not_supported</span>
+        <span>Sin imagen</span>
+      </div>
+      <div class="post-imagen" *ngIf="post.url_imagen">
+        <img [src]="imgUrl(post.url_imagen)" alt="foto">
+      </div>
+
+      <div class="post-descripcion" *ngIf="post.descripcion">
+        <strong>@{{ post.username }}</strong> {{ post.descripcion }}
+      </div>
+
+      <div class="post-hashtags" *ngIf="post.hashtags?.length">
+        <span class="hashtag" *ngFor="let tag of post.hashtags">#{{ tag }}</span>
+      </div>
+
+      <div class="post-acciones">
+        <button class="btn-like" (click)="votar(post.id_post, 'like')">
+          <span class="material-icons">favorite</span> {{ post.total_likes }}
+        </button>
+        <button class="btn-dislike" (click)="votar(post.id_post, 'dislike')">
+          <span class="material-icons">thumb_down</span> {{ post.total_dislikes }}
+        </button>
+        <button class="btn-comentar" (click)="toggleComentarios(post.id_post)">
+          <span class="material-icons">chat_bubble_outline</span> Comentarios
+        </button>
+        <button class="btn-eliminar-post" *ngIf="puedeEliminar(post)" (click)="eliminarPost(post.id_post)">
+          <span class="material-icons">delete</span> Eliminar
+        </button>
+      </div>
+
+      <div class="comentarios-section" *ngIf="comentariosAbiertos[post.id_post]">
+        <div class="comentario" *ngFor="let c of comentarios[post.id_post]">
+          <span class="comentario-user">@{{ c.username }}</span>
+          <span class="comentario-texto">{{ c.contenido }}</span>
+          <button class="btn-eliminar-comentario" *ngIf="usuarioActual?.username === c.username"
+            (click)="eliminarComentario(post.id_post, c.id_comentario)">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        <div class="nuevo-comentario">
+          <input [(ngModel)]="nuevoComentario[post.id_post]" placeholder="Añade un comentario..."
+            class="input-comentario" (keyup.enter)="enviarComentario(post.id_post)" />
+          <button (click)="enviarComentario(post.id_post)" class="btn-enviar">Publicar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Cargar más -->
+  <div class="cargar-mas" *ngIf="page < totalPages">
+    <button (click)="cargarMas()" [disabled]="cargandoMas">
+      <span class="material-icons" [class.spin]="cargandoMas">{{ cargandoMas ? 'autorenew' : 'expand_more' }}</span>
+      {{ cargandoMas ? 'Cargando...' : 'Cargar más' }}
+    </button>
+  </div>
+
+</div>

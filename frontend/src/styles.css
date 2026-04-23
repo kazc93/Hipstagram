@@ -1,0 +1,146 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DESIGN TOKENS — "Warm Studio"
+   Light: papel crema cálido, sombras suaves con tono café
+   Dark:  negro cálido profundo, no el frío azul-gris
+   ═══════════════════════════════════════════════════════ */
+:root {
+  color-scheme: light dark;
+
+  /* Fondos */
+  --bg:              #F8F4EF;
+  --surface:         #FFFFFF;
+  --surface-2:       #F3EDE5;
+
+  /* Bordes */
+  --border:          #EAE0D5;
+  --border-soft:     #F0E8DF;
+  --glass-border:    rgba(60,40,20,0.12);
+
+  /* Tipografía */
+  --text:            #1A1410;
+  --text-soft:       #564E46;
+  --text-muted:      #9A8F84;
+
+  /* Sombras cálidas */
+  --shadow-sm:       0 1px 6px rgba(120,90,60,0.08);
+  --shadow:          0 4px 20px rgba(120,90,60,0.11);
+  --shadow-lg:       0 16px 48px rgba(120,90,60,0.15);
+
+  /* Radios */
+  --radius:          12px;
+  --radius-pill:     24px;
+  --radius-sm:       8px;
+
+  /* Acento azul */
+  --accent-blue:     #0284C7;
+  --accent-blue-bg:  #EFF8FF;
+
+  /* Likes / dislikes */
+  --like:            #E83558;
+  --like-bg:         #FFF0F3;
+  --dislike:         #0284C7;
+  --dislike-bg:      #EFF8FF;
+
+  /* Estado */
+  --success:         #16A34A;
+  --success-bg:      #F0FDF4;
+  --danger-bg:       rgba(232,53,88,0.10);
+
+  /* Campos */
+  --card-bg:         #FFFFFF;
+  --field-bg:        #F3EDE5;
+  --field-border:    #DDD4C8;
+  --field-focus-bg:  #FFFFFF;
+  --field-focus-border: rgba(2,132,199,0.50);
+
+  /* Botón primario */
+  --button-bg:       #1A1410;
+  --button-text:     #FFFFFF;
+
+  /* Navbar */
+  --navbar-bg:       rgba(248,244,239,0.92);
+  --navbar-border:   rgba(60,40,20,0.10);
+  --navbar-icon-hover: rgba(26,20,16,0.07);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Fondos */
+    --bg:              #100E0B;
+    --surface:         #1D1A16;
+    --surface-2:       #252019;
+
+    /* Bordes */
+    --border:          rgba(255,255,255,0.10);
+    --border-soft:     rgba(255,255,255,0.07);
+    --glass-border:    rgba(255,255,255,0.12);
+
+    /* Tipografía */
+    --text:            #F5F0E8;
+    --text-soft:       #C8BDB0;
+    --text-muted:      #8C8078;
+
+    /* Sombras */
+    --shadow-sm:       0 1px 6px rgba(0,0,0,0.35);
+    --shadow:          0 4px 20px rgba(0,0,0,0.50);
+    --shadow-lg:       0 16px 48px rgba(0,0,0,0.65);
+
+    /* Acento azul */
+    --accent-blue-bg:  rgba(2,132,199,0.15);
+
+    /* Likes / dislikes */
+    --like-bg:         rgba(232,53,88,0.15);
+    --dislike-bg:      rgba(2,132,199,0.15);
+
+    /* Estado */
+    --success-bg:      rgba(22,163,74,0.15);
+    --danger-bg:       rgba(232,53,88,0.15);
+
+    /* Campos */
+    --card-bg:         #1D1A16;
+    --field-bg:        rgba(255,255,255,0.06);
+    --field-border:    rgba(255,255,255,0.12);
+    --field-focus-bg:  rgba(255,255,255,0.09);
+    --field-focus-border: rgba(2,132,199,0.45);
+
+    /* Botón primario */
+    --button-bg:       #F5F0E8;
+    --button-text:     #100E0B;
+
+    /* Navbar */
+    --navbar-bg:       rgba(16,14,11,0.90);
+    --navbar-border:   rgba(255,255,255,0.10);
+    --navbar-icon-hover: rgba(255,255,255,0.08);
+  }
+}
+
+/* ─── Base ─────────────────────────────────────── */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea { font-family: inherit; }
+
+/* ─── Scrollbar ─────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
