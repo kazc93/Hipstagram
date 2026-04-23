@@ -1,20 +1,21 @@
-// Controller de autenticación — maneja registro, login y renovación de tokens
+// Controller de autenticación — Este código sirve para gestionar el acceso, registro y seguridad de los usuarios.
+
 import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';    // para hashear y comparar contraseñas de forma segura
-import jwt from 'jsonwebtoken';   // para generar y verificar tokens JWT
+import bcrypt from 'bcryptjs';    
+import jwt from 'jsonwebtoken';   
 import { pool } from '../db';
 import { getAuditLogService } from '../services/auditLog.service';
 import { randomUUID } from 'crypto';
 
-// REGISTRO — crea un nuevo usuario con contraseña hasheada
+// Este código sirve para realizar el registro de nuevos usuarios en la plataforma y asegurar su información.
 export const registro = async (req: Request, res: Response) => {
   try {
     const { username, email, password, nombre_completo } = req.body;
 
-    // Hashear la contraseña con bcrypt antes de guardarla (nunca se guarda en texto plano)
+    // Este código sirve para encriptar la contraseña del usuario para que no sea visible en la base de datos.
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Insertar en la DB y retornar el registro creado
+    // Este código sirve para insertar la información del nuevo perfil en las tablas correspondientes de la DB.
     const query = `
       INSERT INTO usuarios (username, email, password, nombre_completo)
       VALUES ($1, $2, $3, $4) RETURNING *
@@ -22,7 +23,7 @@ export const registro = async (req: Request, res: Response) => {
     const result = await pool.query(query, [username, email, passwordHash, nombre_completo]);
     const nuevoUsuario = result.rows[0];
 
-    // Registrar el evento en el sistema de auditoría
+    // Este código sirve para reportar la creación de la cuenta al sistema de auditoría general.
     await getAuditLogService().log({
       request_id: (req.headers['x-request-id'] as string) ?? randomUUID(),
       actor_user_id: nuevoUsuario.id_usuario,
@@ -36,13 +37,13 @@ export const registro = async (req: Request, res: Response) => {
     });
 
     console.log('Usuario registrado con exito:', username);
-    // Devolver el usuario sin la contraseña hasheada por seguridad
+    // Este código sirve para devolver la respuesta al frontend omitiendo datos sensibles por seguridad.
     const { password: _, ...usuarioSinPass } = nuevoUsuario;
     res.status(201).json(usuarioSinPass);
 
   } catch (error: any) {
     console.error('Error en registro:', error.message);
-    // Código 23505 = violación de UNIQUE en PostgreSQL (username o email duplicado)
+    // Este código sirve para manejar errores cuando el nombre de usuario o correo ya existen en el sistema.
     if (error.code === '23505') {
       return res.status(409).json({ error: 'El username o email ya está en uso' });
     }
@@ -50,20 +51,20 @@ export const registro = async (req: Request, res: Response) => {
   }
 };
 
-// REFRESH TOKEN — renueva el access token sin pedir contraseña nuevamente
+// Este código sirve para renovar el permiso de acceso del usuario de forma automática cuando el token principal expira.
 export const refreshToken = async (req: Request, res: Response): Promise<any> => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
     return res.status(401).json({ mensaje: 'Refresh token requerido' });
   }
   try {
-    // Verificar que el refresh token es válido y no ha expirado (7 días)
+    // Este código sirve para verificar si el código de renovación sigue siendo válido y no ha caducado.
     const decoded = jwt.verify(
       refreshToken,
       process.env['JWT_REFRESH_SECRET'] || 'refresh_clave_secreta'
     ) as any;
 
-    // Confirmar que el usuario sigue activo antes de emitir un nuevo token
+    // Este código sirve para confirmar en la base de datos que el usuario no ha sido bloqueado antes de darle nuevo acceso.
     const result = await pool.query(
       'SELECT * FROM usuarios WHERE id_usuario = $1 AND activo = TRUE',
       [decoded.id]
@@ -73,7 +74,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<any> =>
     }
 
     const usuario = result.rows[0];
-    // Emitir nuevo access token con vida de 24 horas
+    // Este código sirve para generar un nuevo pase de acceso (Token) con los permisos actualizados del usuario.
     const newToken = jwt.sign(
       { id: usuario.id_usuario, username: usuario.username, rol: usuario.id_rol === 1 ? 'ADMIN' : 'USER' },
       process.env['JWT_SECRET'] || 'tu_clave_secreta_aqui',
@@ -86,7 +87,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<any> =>
   }
 };
 
-// LOGIN — autentica al usuario y entrega access token + refresh token
+// Este código sirve para validar las credenciales de entrada y otorgar los tokens de seguridad necesarios para navegar.
 export const login = async (req: Request, res: Response): Promise<any> => {
   const { username, password } = req.body;
   const requestId = (req.headers['x-request-id'] as string) ?? randomUUID();
@@ -94,13 +95,13 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   try {
     console.log('Intento de login para:', username);
 
-    // Buscar por username O por email (el usuario puede usar cualquiera de los dos)
+    // Este código sirve para buscar al usuario en la base de datos utilizando ya sea su nombre o su correo electrónico.
     const result = await pool.query(
       'SELECT * FROM usuarios WHERE username = $1 OR email = $1',
       [username]
     );
 
-    // Usuario no existe — registrar en auditoría y responder con mensaje genérico
+    // Este código sirve para reportar al sistema de auditoría si alguien intenta entrar con un usuario que no existe.
     if (result.rows.length === 0) {
       await getAuditLogService().log({
         request_id: requestId,
@@ -118,10 +119,10 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
     const usuario = result.rows[0];
 
-    // Comparar la contraseña ingresada contra el hash almacenado en la DB
+    // Este código sirve para comparar la contraseña que escribió el usuario contra la que tenemos guardada encriptada.
     const passwordValida = await bcrypt.compare(password, usuario.password);
 
-    // Contraseña incorrecta — registrar en auditoría
+    // Este código sirve para registrar en la auditoría cuando un usuario ingresa una contraseña equivocada.
     if (!passwordValida) {
       await getAuditLogService().log({
         request_id: requestId,
@@ -137,17 +138,18 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       return res.status(401).json({ mensaje: 'Usuario o clave incorrectos' });
     }
 
-    // Login exitoso — generar access token (24h) con id, username y rol en el payload
+    // Este código sirve para generar el token de acceso principal que identifica al usuario y su rol (Admin o Usuario).
     const token = jwt.sign(
       {
         id: usuario.id_usuario,
         username: usuario.username,
-        rol: usuario.id_rol === 1 ? 'ADMIN' : 'USER'  // 1 = ADMIN, 2 = USER
+        rol: usuario.id_rol === 1 ? 'ADMIN' : 'USER'
       },
       process.env['JWT_SECRET'] || 'tu_clave_secreta_aqui',
       { expiresIn: '24h' }
     );
 
+    // Este código sirve para dejar constancia en los logs de que el usuario entró al sistema exitosamente.
     await getAuditLogService().log({
       request_id: requestId,
       actor_user_id: usuario.id_usuario,
@@ -160,7 +162,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       ip_origen: req.ip ?? null,
     });
 
-    // Generar refresh token de larga duración (7 días) para renovar el access token
+    // Este código sirve para crear un token de respaldo de larga duración para mantener la sesión iniciada.
     const refreshTokenValue = jwt.sign(
       { id: usuario.id_usuario },
       process.env['JWT_REFRESH_SECRET'] || 'refresh_clave_secreta',
@@ -168,6 +170,8 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     );
 
     console.log('Login exitoso para:', username);
+
+    // Este código sirve para enviar toda la información de sesión necesaria hacia la aplicación cliente (Frontend).
     res.json({
       mensaje: 'Login exitoso',
       token,
