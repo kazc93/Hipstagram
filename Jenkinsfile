@@ -226,6 +226,8 @@ pipeline {
             echo "Pipeline falló. Revisa los logs de la etapa que falló."
         }
         always {
+            // Limpiar imágenes Docker antiguas para no llenar el disco
+            sh 'docker image prune -af --filter "until=24h" || true'
             cleanWs()
         }
     }
