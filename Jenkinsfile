@@ -185,8 +185,7 @@ pipeline {
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
 
                         # Levantar microservicios con docker-compose
-                        docker compose --env-file ${ENV_FILE} up -d \
-                          db auth-service post-service search-service admin-service gateway
+                        cp /etc/hipstagram.env .env && docker-compose up -d db auth-service post-service search-service admin-service gateway
 
                         echo "Smoke test..."
                         sleep 8
