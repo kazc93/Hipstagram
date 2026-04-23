@@ -78,11 +78,13 @@ CREATE TABLE IF NOT EXISTS hashtags_prohibidos (
 CREATE TABLE IF NOT EXISTS audit_logs (
     id_log SERIAL PRIMARY KEY,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    request_id VARCHAR(36),
     actor_user_id INTEGER REFERENCES usuarios(id_usuario),
     actor_role VARCHAR(20),
     action VARCHAR(100) NOT NULL,
     entity_type VARCHAR(50),
     entity_id INTEGER,
+    payload_resumen TEXT,
     resultado VARCHAR(20),
     ip_origen VARCHAR(50)
 );

@@ -1,5 +1,6 @@
 services:
 
+  # ── Base de datos ─────────────────────────────────────────────────────────────
   db:
     image: postgres:15-alpine
     container_name: hipstagram-db
@@ -14,14 +15,32 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  backend:
+  # ── Microservicio: Auth (puerto 3001) ─────────────────────────────────────────
+  auth-service:
     build:
-      context: ./backend
+      context: ./backend/services/auth-service
       dockerfile: Dockerfile
-    container_name: hipstagram-backend
+    container_name: hipstagram-auth-service
     restart: always
-    ports:
-      - "3000:3000"
+    environment:
+      DB_USER:              ${DB_USER}
+      DB_HOST:              db
+      DB_NAME:              ${DB_NAME}
+      DB_PASSWORD:          ${DB_PASSWORD}
+      DB_PORT:              ${DB_PORT}
+      JWT_SECRET:           ${JWT_SECRET}
+      JWT_REFRESH_SECRET:   ${JWT_REFRESH_SECRET}
+      CORS_ORIGIN:          ${CORS_ORIGIN}
+    depends_on:
+      - db
+
+  # ── Microservicio: Posts (puerto 3002) ────────────────────────────────────────
+  post-service:
+    build:
+      context: ./backend/services/post-service
+      dockerfile: Dockerfile
+    container_name: hipstagram-post-service
+    restart: always
     environment:
       DB_USER:      ${DB_USER}
       DB_HOST:      db
@@ -29,12 +48,64 @@ services:
       DB_PASSWORD:  ${DB_PASSWORD}
       DB_PORT:      ${DB_PORT}
       JWT_SECRET:   ${JWT_SECRET}
-      UPLOADS_DIR:  /app/uploads
-    volumes:
-      - ./backend/uploads:/app/uploads
+      AWS_REGION:   ${AWS_REGION}
+      S3_BUCKET:    ${S3_BUCKET}
+      CORS_ORIGIN:  ${CORS_ORIGIN}
     depends_on:
       - db
 
+  # ── Microservicio: Búsqueda (puerto 3003) ─────────────────────────────────────
+  search-service:
+    build:
+      context: ./backend/services/search-service
+      dockerfile: Dockerfile
+    container_name: hipstagram-search-service
+    restart: always
+    environment:
+      DB_USER:      ${DB_USER}
+      DB_HOST:      db
+      DB_NAME:      ${DB_NAME}
+      DB_PASSWORD:  ${DB_PASSWORD}
+      DB_PORT:      ${DB_PORT}
+      JWT_SECRET:   ${JWT_SECRET}
+      CORS_ORIGIN:  ${CORS_ORIGIN}
+    depends_on:
+      - db
+
+  # ── Microservicio: Admin (puerto 3004) ────────────────────────────────────────
+  admin-service:
+    build:
+      context: ./backend/services/admin-service
+      dockerfile: Dockerfile
+    container_name: hipstagram-admin-service
+    restart: always
+    environment:
+      DB_USER:      ${DB_USER}
+      DB_HOST:      db
+      DB_NAME:      ${DB_NAME}
+      DB_PASSWORD:  ${DB_PASSWORD}
+      DB_PORT:      ${DB_PORT}
+      JWT_SECRET:   ${JWT_SECRET}
+      CORS_ORIGIN:  ${CORS_ORIGIN}
+    depends_on:
+      - db
+
+  # ── API Gateway nginx (puerto 3000 público) ───────────────────────────────────
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: hipstagram-gateway
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - post-service
+      - search-service
+      - admin-service
+
+  # ── Frontend (solo para desarrollo local — producción usa Amplify) ────────────
   frontend:
     build:
       context: ./frontend
@@ -44,7 +115,7 @@ services:
     ports:
       - "4200:80"
     depends_on:
-      - backend
+      - gateway
 
 volumes:
   postgres_data:

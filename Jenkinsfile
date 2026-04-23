@@ -7,22 +7,28 @@ pipeline {
         AWS_ACCOUNT_ID  = '630171690893'
 
         ECR_REGISTRY    = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        ECR_REPO        = 'hipstagram-backend'
+
+        // Un repositorio ECR por microservicio
+        ECR_REPO_AUTH   = 'hipstagram-auth-service'
+        ECR_REPO_POST   = 'hipstagram-post-service'
+        ECR_REPO_SEARCH = 'hipstagram-search-service'
+        ECR_REPO_ADMIN  = 'hipstagram-admin-service'
+        ECR_REPO_GW     = 'hipstagram-gateway'
+
         IMAGE_TAG       = "${env.BUILD_NUMBER}"
-        FULL_IMAGE      = "${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}"
 
         SONAR_SERVER    = 'SonarQube'
         ENV_FILE        = '/etc/hipstagram.env'
     }
 
     tools {
-        nodejs 'NodeJS-18'   // nombre del NodeJS configurado en Jenkins > Global Tools
+        nodejs 'NodeJS-18'
     }
 
     options {
         timestamps()
         disableConcurrentBuilds()
-        timeout(time: 30, unit: 'MINUTES')
+        timeout(time: 45, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
@@ -37,7 +43,7 @@ pipeline {
             }
         }
 
-        // 2. Instalar dependencias
+        // 2. Instalar dependencias del backend monolítico (para tests y lint)
         stage('Install Dependencies') {
             steps {
                 dir('backend') {
@@ -46,7 +52,7 @@ pipeline {
             }
         }
 
-        // 3. Escaneo de dependencias + Lint
+        // 3. Lint
         stage('Lint') {
             steps {
                 dir('backend') {
@@ -97,7 +103,7 @@ pipeline {
             }
         }
 
-        // 6. Quality Gate (espera el resultado de SonarQube)
+        // 6. Quality Gate
         stage('Quality Gate') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
@@ -106,12 +112,16 @@ pipeline {
             }
         }
 
-        // 7. Build Docker
-        stage('Build Docker Image') {
+        // 7. Build imágenes Docker de los microservicios
+        stage('Build Docker Images') {
             steps {
-                dir('backend') {
-                    sh "docker build -t ${FULL_IMAGE} -t ${ECR_REGISTRY}/${ECR_REPO}:latest ."
-                }
+                sh """
+                    docker build -t ${ECR_REGISTRY}/${ECR_REPO_AUTH}:${IMAGE_TAG}   -t ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest   ./backend/services/auth-service
+                    docker build -t ${ECR_REGISTRY}/${ECR_REPO_POST}:${IMAGE_TAG}   -t ${ECR_REGISTRY}/${ECR_REPO_POST}:latest   ./backend/services/post-service
+                    docker build -t ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:${IMAGE_TAG} -t ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest ./backend/services/search-service
+                    docker build -t ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:${IMAGE_TAG}  -t ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest  ./backend/services/admin-service
+                    docker build -t ${ECR_REGISTRY}/${ECR_REPO_GW}:${IMAGE_TAG}     -t ${ECR_REGISTRY}/${ECR_REPO_GW}:latest     ./gateway
+                """
             }
         }
 
@@ -126,20 +136,33 @@ pipeline {
                         aws ecr get-login-password --region ${AWS_REGION} \
                           | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
-                        docker push ${FULL_IMAGE}
-                        docker push ${ECR_REGISTRY}/${ECR_REPO}:latest
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_AUTH}:${IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_POST}:${IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:${IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:${IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_GW}:${IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
                     """
                 }
             }
             post {
                 always {
-                    sh "docker rmi ${FULL_IMAGE} || true"
-                    sh "docker rmi ${ECR_REGISTRY}/${ECR_REPO}:latest || true"
+                    sh """
+                        docker rmi ${ECR_REGISTRY}/${ECR_REPO_AUTH}:${IMAGE_TAG}   || true
+                        docker rmi ${ECR_REGISTRY}/${ECR_REPO_POST}:${IMAGE_TAG}   || true
+                        docker rmi ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:${IMAGE_TAG} || true
+                        docker rmi ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:${IMAGE_TAG}  || true
+                        docker rmi ${ECR_REGISTRY}/${ECR_REPO_GW}:${IMAGE_TAG}     || true
+                    """
                 }
             }
         }
 
-        // 9. Deploy al EC2 (Docker directo — IP estable, HTTPS via Nginx)
+        // 9. Deploy al EC2 con docker-compose
         stage('Deploy to EC2') {
             steps {
                 withCredentials([[
@@ -150,20 +173,23 @@ pipeline {
                         aws ecr get-login-password --region ${AWS_REGION} \
                           | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
-                        docker pull ${FULL_IMAGE}
+                        # Detener y eliminar contenedores anteriores
+                        docker stop hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service || true
+                        docker rm   hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service || true
 
-                        docker stop hipstagram-backend || true
-                        docker rm   hipstagram-backend || true
+                        # Pull de las nuevas imágenes
+                        docker pull ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
+                        docker pull ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
+                        docker pull ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
+                        docker pull ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
+                        docker pull ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
 
-                        docker run -d \
-                          --name hipstagram-backend \
-                          --restart unless-stopped \
-                          -p 3000:3000 \
-                          --env-file ${ENV_FILE} \
-                          ${FULL_IMAGE}
+                        # Levantar microservicios con docker-compose
+                        docker-compose --env-file ${ENV_FILE} up -d \
+                          db auth-service post-service search-service admin-service gateway
 
                         echo "Smoke test..."
-                        sleep 6
+                        sleep 8
                         curl -sf http://localhost:3000/api/health \
                           && echo "Health check OK" \
                           || echo "Health check no responde (continua de todas formas)"
@@ -176,10 +202,10 @@ pipeline {
     // ── Post-pipeline ────────────────────────────────────────────────────────
     post {
         success {
-            echo "Pipeline completado con exito. Imagen: ${FULL_IMAGE} desplegada en EC2."
+            echo "Pipeline completado con exito. Microservicios desplegados en EC2 (build #${IMAGE_TAG})."
         }
         failure {
-            echo "❌ Pipeline falló. Revisa los logs de la etapa que falló."
+            echo "Pipeline falló. Revisa los logs de la etapa que falló."
         }
         always {
             cleanWs()

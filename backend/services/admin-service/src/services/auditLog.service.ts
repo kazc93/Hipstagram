@@ -1,9 +1,9 @@
-// backend/src/services/auditLog.service.ts
+// Servicio de auditoría completo para admin-service
+// Usa DoublyLinkedList en memoria + persistencia en PostgreSQL
 
 import { Pool } from 'pg';
 import { DoublyLinkedList } from '../data-structures/DoublyLinkedList';
 import { randomUUID } from 'crypto';
-
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -46,43 +46,30 @@ export interface AuditEvent {
 // ─── Servicio ─────────────────────────────────────────────────────────────────
 
 class AuditLogService {
-  // Lista doblemente enlazada en memoria (acceso O(1) al tail para appends)
   private list = new DoublyLinkedList<AuditEvent>();
-
-  // Límite de eventos en memoria para no saturar el proceso
   private readonly MAX_IN_MEMORY = 500;
 
   constructor(private db: Pool) {}
 
-  /**
-   * Registra un evento de auditoría.
-   * Guarda en la lista en memoria Y persiste en la base de datos.
-   */
   async log(params: Omit<AuditEvent, 'id' | 'timestamp'>): Promise<void> {
     const event: AuditEvent = {
-        id: randomUUID(),
+      id: randomUUID(),
       timestamp: new Date(),
       ...params,
     };
 
-    // 1. Agregar al final de la lista doblemente enlazada
     this.list.append(event);
 
-    // 2. Si supera el límite en memoria, eliminar el nodo más antiguo (head)
     if (this.list.size > this.MAX_IN_MEMORY) {
       const head = this.list.getHead();
       if (head) this.list.remove(head);
     }
 
-    // 3. Persistir en base de datos (no bloquea — fire and forget con manejo de error)
     this.persist(event).catch((err) => {
       console.error('[AuditLog] Error persistiendo evento:', err.message);
     });
   }
 
-  /**
-   * Persiste el evento en la tabla audit_logs de PostgreSQL.
-   */
   private async persist(event: AuditEvent): Promise<void> {
     await this.db.query(
       `INSERT INTO audit_logs
@@ -104,24 +91,17 @@ class AuditLogService {
     );
   }
 
-  /**
-   * Devuelve eventos paginados desde memoria (más recientes primero).
-   * Si se piden páginas muy antiguas que ya no están en memoria, cae a DB.
-   */
   async getPaginated(
     page: number,
     pageSize: number,
     filters?: { action?: AuditAction; actor_user_id?: string; result?: AuditResult }
   ): Promise<{ data: AuditEvent[]; total: number; totalPages: number }> {
-    // Si hay filtros, consultar directamente la DB para exactitud
     if (filters && Object.keys(filters).length > 0) {
       return this.getPaginatedFromDB(page, pageSize, filters);
     }
 
-    // Sin filtros: servir desde la lista en memoria
     const paginated = this.list.paginate(page, pageSize);
 
-    // Si la página pedida está vacía pero existe en DB, caer a DB
     if (paginated.data.length === 0 && page > 1) {
       return this.getPaginatedFromDB(page, pageSize, filters);
     }
@@ -129,10 +109,6 @@ class AuditLogService {
     return paginated;
   }
 
-  /**
-   * Consulta la base de datos directamente.
-   * Se usa para filtros o páginas antiguas no disponibles en memoria.
-   */
   private async getPaginatedFromDB(
     page: number,
     pageSize: number,
@@ -165,7 +141,7 @@ class AuditLogService {
 
     const offset = (page - 1) * pageSize;
     const dataRes = await this.db.query(
-      `SELECT a.*, u.username, resultado as result 
+      `SELECT a.*, u.username, resultado as result
        FROM audit_logs a
        LEFT JOIN usuarios u ON a.actor_user_id = u.id_usuario
        ${where}
@@ -181,10 +157,6 @@ class AuditLogService {
     };
   }
 
-  /**
-   * Recarga los eventos más recientes desde la DB al iniciar el servidor.
-   * Evita que la lista esté vacía en el primer arranque.
-   */
   async loadRecentFromDB(): Promise<void> {
     try {
       const res = await this.db.query(
@@ -193,7 +165,6 @@ class AuditLogService {
          LIMIT $1`,
         [this.MAX_IN_MEMORY]
       );
-      // Cargar en orden cronológico (más antiguo primero = append al tail)
       const rows = (res.rows as AuditEvent[]).reverse();
       rows.forEach((row) => this.list.append(row));
       console.log(`[AuditLog] ${rows.length} eventos cargados en memoria desde DB`);
@@ -205,7 +176,6 @@ class AuditLogService {
 }
 
 // ─── Singleton ────────────────────────────────────────────────────────────────
-// Se inicializa con el pool de conexión en index.ts / db.ts
 
 let _instance: AuditLogService | null = null;
 
