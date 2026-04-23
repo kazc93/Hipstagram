@@ -162,7 +162,7 @@ pipeline {
             }
         }
 
-        // 9. Deploy al EC2 con docker run (sin docker-compose)
+        // 9. Deploy al EC2 con docker run
         stage('Deploy to EC2') {
             steps {
                 withCredentials([[
@@ -187,9 +187,10 @@ pipeline {
                         # 3. Crear red interna de Docker
                         docker network create hipstagram-network || true
 
-                        # 4. Levantar la Base de Datos
+                        # 4. Levantar la Base de Datos (Limitada a 256MB)
                         docker run -d --name db \\
                           --network hipstagram-network \\
+                          --memory="256m" \\
                           -e POSTGRES_USER=hipstagram_user \\
                           -e POSTGRES_PASSWORD=hipstagram_pass \\
                           -e POSTGRES_DB=hipstagram_db \\
@@ -198,14 +199,14 @@ pipeline {
                         # Dar tiempo a la DB para arrancar
                         sleep 10
 
-                        # 5. Levantar microservicios inyectando las variables de entorno
-                        docker run -d --name hipstagram-auth-service --network hipstagram-network --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
-                        docker run -d --name hipstagram-post-service --network hipstagram-network --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
-                        docker run -d --name hipstagram-search-service --network hipstagram-network --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
-                        docker run -d --name hipstagram-admin-service --network hipstagram-network --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
+                        # 5. Levantar microservicios inyectando las variables de entorno (Limitados a 128MB c/u)
+                        docker run -d --name hipstagram-auth-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
+                        docker run -d --name hipstagram-post-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_POST}:latest
+                        docker run -d --name hipstagram-search-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_SEARCH}:latest
+                        docker run -d --name hipstagram-admin-service --network hipstagram-network --memory="128m" --env-file ${ENV_FILE} ${ECR_REGISTRY}/${ECR_REPO_ADMIN}:latest
 
-                        # 6. Levantar Gateway y exponer puerto 3000
-                        docker run -d --name hipstagram-gateway --network hipstagram-network -p 3000:80 ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
+                        # 6. Levantar Gateway y exponer puerto 3000 (Limitado a 64MB)
+                        docker run -d --name hipstagram-gateway --network hipstagram-network --memory="64m" -p 3000:80 ${ECR_REGISTRY}/${ECR_REPO_GW}:latest
 
                         echo "Smoke test..."
                         sleep 8
