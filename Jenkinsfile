@@ -170,15 +170,13 @@ pipeline {
                     credentialsId: 'aws-credentials'
                 ]]) {
                     sh """
-                        aws ecr get-login-password --region ${AWS_REGION} \
-                          | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
                         # 1. Detener y eliminar TODO para liberar el puerto 3000
                         docker stop hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
                         docker rm -f \\$(docker ps -aq) || true
                         docker network prune -f || true
-                        # Liberar puerto 3000 si algún proceso ajeno lo ocupa
-                        fuser -k 3000/tcp 2>/dev/null || true
+                        fuser -k 3000/tcp || true
                         sleep 2
 
                         # 2. Pull de las nuevas imágenes
@@ -214,9 +212,7 @@ pipeline {
 
                         echo "Smoke test..."
                         sleep 8
-                        curl -sf http://localhost:3000/api/health \
-                          && echo "Health check OK" \
-                          || echo "Health check no responde (continua de todas formas)"
+                        curl -sf http://localhost:3000/api/health && echo "Health check OK" || echo "Health check no responde (continua de todas formas)"
                     """
                 }
             }
