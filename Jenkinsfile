@@ -177,6 +177,9 @@ pipeline {
                         docker stop hipstagram-gateway hipstagram-auth-service hipstagram-post-service hipstagram-search-service hipstagram-admin-service db || true
                         docker rm -f \\$(docker ps -aq) || true
                         docker network prune -f || true
+                        # Liberar puerto 3000 si algún proceso ajeno lo ocupa
+                        fuser -k 3000/tcp 2>/dev/null || true
+                        sleep 2
 
                         # 2. Pull de las nuevas imágenes
                         docker pull ${ECR_REGISTRY}/${ECR_REPO_AUTH}:latest
