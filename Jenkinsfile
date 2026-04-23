@@ -182,8 +182,8 @@ pipeline {
                     sh 'fuser -k 3000/tcp 2>/dev/null || true'
                     sh 'sleep 2'
 
-                    // 3. Copiar init.sql a ubicacion estable para que postgres lo ejecute al iniciar
-                    sh 'cp "$WORKSPACE/init.sql" /etc/hipstagram-init.sql'
+                    // 3. Copiar init.sql a directorio de Jenkins (tiene permisos de escritura)
+                    sh 'cp "$WORKSPACE/init.sql" /var/lib/jenkins/hipstagram-init.sql'
 
                     // 4. Pull e iniciar microservicios
                     sh """
@@ -199,7 +199,7 @@ pipeline {
                           --network hipstagram-network \
                           --memory=256m \
                           -v hipstagram-pgdata:/var/lib/postgresql/data \
-                          -v /etc/hipstagram-init.sql:/docker-entrypoint-initdb.d/init.sql \
+                          -v /var/lib/jenkins/hipstagram-init.sql:/docker-entrypoint-initdb.d/init.sql \
                           -e POSTGRES_USER=hipstagram_user \
                           -e POSTGRES_PASSWORD=hipstagram_pass \
                           -e POSTGRES_DB=hipstagram_db \
