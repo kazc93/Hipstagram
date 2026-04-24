@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Diagrama Entidad-Relación — Hipstagram</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #111;
+    }
+    .subtitulo {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 28px;
+    }
+    .canvas-wrapper { display: flex; justify-content: center; }
+    .canvas { position: relative; width: 1160px; height: 615px; }
+
+    /* ── Tabla ER ── */
+    .tbl {
+      position: absolute;
+      background: #fff;
+      border: 1.5px solid #555;
+      border-radius: 4px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.10);
+      font-size: 11px;
+      overflow: hidden;
+    }
+    .tbl-header {
+      background: #f0f0f0;
+      border-bottom: 1.5px solid #555;
+      padding: 6px 10px;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: center;
+      color: #111;
+      text-transform: lowercase;
+      letter-spacing: 0.3px;
+    }
+    .tbl-field {
+      padding: 4px 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #333;
+      line-height: 1.3;
+    }
+    .tbl-field:last-child { border-bottom: none; }
+    .tbl-field.pk { font-weight: bold; }
+    .tbl-field.fk { color: #555; font-style: italic; }
+    .tbl-field.pk-fk { font-weight: bold; font-style: italic; }
+    .badge {
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .badge-pk { background: #333; color: #fff; }
+    .badge-fk { background: #888; color: #fff; }
+    .badge-uq { background: #0066cc; color: #fff; }
+
+    /* Leyenda */
+    .leyenda {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .leyenda-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Diagrama Entidad-Relación — Hipstagram</h1>
+<p class="subtitulo">Modelo de datos · PostgreSQL 15 · Tablas según init.sql</p>
+
+<div class="canvas-wrapper">
+<div class="canvas">
+
+<!-- ══ SVG: líneas de relación ══ -->
+<svg style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none;">
+  <defs>
+    <!-- Flecha normal -->
+    <marker id="arr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#666"/>
+    </marker>
+    <!-- Marca "1" (uno) -->
+    <marker id="one" markerWidth="8" markerHeight="14" refX="4" refY="7" orient="auto">
+      <line x1="4" y1="1" x2="4" y2="13" stroke="#666" stroke-width="1.5"/>
+    </marker>
+    <!-- Marca "N" (muchos) — pata de cuervo simplificada -->
+    <marker id="many" markerWidth="10" markerHeight="14" refX="1" refY="7" orient="auto">
+      <line x1="1" y1="7" x2="9" y2="1" stroke="#666" stroke-width="1.5"/>
+      <line x1="1" y1="7" x2="9" y2="7" stroke="#666" stroke-width="1.5"/>
+      <line x1="1" y1="7" x2="9" y2="13" stroke="#666" stroke-width="1.5"/>
+    </marker>
+  </defs>
+
+  <!-- ── 1. usuarios → roles (id_rol FK) ── -->
+  <!-- usuarios left(210,187) → elbow left → roles right(175,102) -->
+  <polyline points="210,187 130,187 130,102 175,102"
+    fill="none" stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="138" y="148" font-size="9" fill="#888" font-family="Arial" transform="rotate(-90,138,148)">id_rol</text>
+
+  <!-- ── 2. posts → usuarios (id_usuario FK) ── -->
+  <!-- posts left(455,87) → usuarios right(410,87) horizontal -->
+  <line x1="455" y1="87" x2="410" y2="87"
+    stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="420" y="82" font-size="9" fill="#888" font-family="Arial">id_usuario</text>
+
+  <!-- ── 3. votos → posts (id_post FK) ── -->
+  <!-- votos left(705,112) → posts right(655,112) horizontal -->
+  <line x1="705" y1="112" x2="655" y2="112"
+    stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="657" y="107" font-size="9" fill="#888" font-family="Arial">id_post</text>
+
+  <!-- ── 4. votos → usuarios (id_usuario FK) — bezier arriba de posts ── -->
+  <!-- FROM votos left(705,87) CURVE ABOVE TO usuarios right(410,75) -->
+  <path d="M705,80 C640,-15 470,-15 410,75"
+    fill="none" stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="547" y="8" font-size="9" fill="#888" font-family="Arial">id_usuario</text>
+
+  <!-- ── 5. hashtags → post_hashtags (id_hashtag FK) ── -->
+  <!-- hashtags bottom(1055,105) → post_hashtags top(1055,165) vertical -->
+  <line x1="1055" y1="105" x2="1055" y2="165"
+    stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#one)"/>
+  <text x="1060" y="138" font-size="9" fill="#888" font-family="Arial">id_hashtag</text>
+
+  <!-- ── 6. post_hashtags → posts (id_post FK) — ruta por la derecha de votos ── -->
+  <!-- post_hashtags left(960,200) → (910,200) → (910,120) → posts right(655,120) -->
+  <polyline points="960,200 910,200 910,120 655,120"
+    fill="none" stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="762" y="115" font-size="9" fill="#888" font-family="Arial">id_post</text>
+
+  <!-- ── 7. comentarios → posts (id_post FK) ── -->
+  <!-- comentarios top(555,305) → posts bottom(555,235) vertical -->
+  <line x1="570" y1="305" x2="570" y2="235"
+    stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="575" y="273" font-size="9" fill="#888" font-family="Arial">id_post</text>
+
+  <!-- ── 8. comentarios → usuarios (id_usuario FK) ── -->
+  <!-- comentarios left(455,345) → left space → usuarios right(410,170) -->
+  <polyline points="455,345 432,345 432,170 410,170"
+    fill="none" stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="436" y="260" font-size="9" fill="#888" font-family="Arial" transform="rotate(-90,436,260)">id_usuario</text>
+
+  <!-- ── 9. hashtags_prohibidos → usuarios (agregado_por FK) ── -->
+  <!-- hashtags_prohibidos right(215,400) → (180,400) → (180,240) → usuarios left(210,240) -->
+  <polyline points="215,400 180,400 180,240 210,240"
+    fill="none" stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="184" y="322" font-size="9" fill="#888" font-family="Arial" transform="rotate(-90,184,322)">agregado_por</text>
+
+  <!-- ── 10. audit_logs → usuarios (actor_user_id FK) ── -->
+  <!-- audit_logs top(315,310) → usuarios bottom(310,255) short vertical -->
+  <line x1="315" y1="310" x2="310" y2="255"
+    stroke="#666" stroke-width="1.3"
+    marker-end="url(#arr)" marker-start="url(#many)"/>
+  <text x="319" y="285" font-size="9" fill="#888" font-family="Arial">actor_user_id</text>
+
+</svg>
+
+<!-- ══ TABLAS ══ -->
+
+<!-- ROLES -->
+<div class="tbl" style="left:20px; top:60px; width:155px;">
+  <div class="tbl-header">roles</div>
+  <div class="tbl-field pk"><span class="badge badge-pk">PK</span> id_rol</div>
+  <div class="tbl-field">nombre</div>
+</div>
+
+<!-- USUARIOS -->
+<div class="tbl" style="left:210px; top:20px; width:195px;">
+  <div class="tbl-header">usuarios</div>
+  <div class="tbl-field pk"><span class="badge badge-pk">PK</span> id_usuario</div>
+  <div class="tbl-field">username</div>
+  <div class="tbl-field">email</div>
+  <div class="tbl-field">password</div>
+  <div class="tbl-field">nombre_completo</div>
+  <div class="tbl-field fk"><span class="badge badge-fk">FK</span> id_rol</div>
+  <div class="tbl-field">activo</div>
+  <div class="tbl-field">fecha_registro</div>
+</div>
+
+<!-- POSTS -->
+<div class="tbl" style="left:455px; top:20px; width:195px;">
+  <div class="tbl-header">posts</div>
+  <div class="tbl-field pk"><span class="badge badge-pk">PK</span> id_post</div>
+  <div class="tbl-field fk"><span class="badge badge-fk">FK</span> id_usuario</div>
+  <div class="tbl-field">descripcion</div>
+  <div class="tbl-field">url_imagen</div>
+  <div class="tbl-field">estado</div>
+  <div class="tbl-field">total_likes</div>
+  <div class="tbl-field">total_dislikes</div>
+  <div class="tbl-field">fecha_creacion</div>
+</div>
+
+<!-- VOTOS -->
+<div class="tbl" style="left:705px; top:20px; width:195px;">
+  <div class="tbl-header">votos</div>
+  <div class="tbl-field pk"><span class="badge badge-pk">PK</span> id_voto</div>
+  <div class="tbl-field fk"><span class="badge badge-fk">FK</span> id_usuario</div>
+  <div class="tbl-field fk"><span class="badge badge-fk">FK</span> id_post</div>
+  <div class="tbl-field">tipo <em style="color:#aaa">(like/dislike)</em></div>
+  <div class="tbl-field">fecha_voto</div>
+  <div class="tbl-field"><span class="badge badge-uq">UQ</span> (id_usuario, id_post)</div>
+</div>
+
+<!-- HASHTAGS -->
+<div class="tbl" style="left:960px; top:20px; width:185px;">
+  <div class="tbl-header">hashtags</div>
+  <div class="tbl-field pk"><span class="badge badge-pk">PK</span> id_hashtag</div>
+  <div class="tbl-field">nombre</div>
+</div>
+
+<!-- POST_HASHTAGS -->
+<div class="tbl" style="left:960px; top:165px; width:185px;">
+  <div class="tbl-header">post_hashtags</div>
+  <div class="tbl-field pk-fk"><span class="badge badge-pk">PK</span><span class="badge badge-fk">FK</span> id_post</div>
+  <div class="tbl-field pk-fk"><span class="badge badge-pk">PK</span><span class="badge badge-fk">FK</span> id_hashtag</div>
+</div>
+
+<!-- COMENTARIOS -->
+<div class="tbl" style="left:455px; top:305px; width:195px;">
+  <div class="tbl-header">comentarios</div>
+  <div class="tbl-field pk"><span class="badge badge-pk">PK</span> id_comentario</div>
+  <div class="tbl-field fk"><span class="badge badge-fk">FK</span> id_usuario</div>
+  <div class="tbl-field fk"><span class="badge badge-fk">FK</span> id_post</div>
+  <div class="tbl-field">contenido</div>
+  <div class="tbl-field">fecha_comentario</div>
+</div>
+
+<!-- HASHTAGS_PROHIBIDOS -->
+<div class="tbl" style="left:20px; top:320px; width:190px;">
+  <div class="tbl-header">hashtags_prohibidos</div>
+  <div class="tbl-field pk"><span class="badge badge-pk">PK</span> id</div>
+  <div class="tbl-field"><span class="badge badge-uq">UQ</span> nombre</div>
+  <div class="tbl-field fk"><span class="badge badge-fk">FK</span> agregado_por</div>
+  <div class="tbl-field">fecha_agregado</div>
+</div>
+
+<!-- AUDIT_LOGS -->
+<div class="tbl" style="left:215px; top:310px; width:200px;">
+  <div class="tbl-header">audit_logs</div>
+  <div class="tbl-field pk"><span class="badge badge-pk">PK</span> id_log</div>
+  <div class="tbl-field">timestamp</div>
+  <div class="tbl-field">request_id</div>
+  <div class="tbl-field fk"><span class="badge badge-fk">FK</span> actor_user_id</div>
+  <div class="tbl-field">actor_role</div>
+  <div class="tbl-field">action</div>
+  <div class="tbl-field">entity_type</div>
+  <div class="tbl-field">entity_id</div>
+  <div class="tbl-field">payload_resumen</div>
+  <div class="tbl-field">resultado</div>
+  <div class="tbl-field">ip_origen</div>
+</div>
+
+</div><!-- /canvas -->
+</div><!-- /wrapper -->
+
+<!-- Leyenda -->
+<div class="leyenda">
+  <div class="leyenda-item">
+    <span class="badge badge-pk" style="font-size:10px;padding:2px 6px;">PK</span> Llave Primaria
+  </div>
+  <div class="leyenda-item">
+    <span class="badge badge-fk" style="font-size:10px;padding:2px 6px;">FK</span> Llave Foránea
+  </div>
+  <div class="leyenda-item">
+    <span class="badge badge-uq" style="font-size:10px;padding:2px 6px;">UQ</span> Restricción UNIQUE
+  </div>
+  <div class="leyenda-item">
+    <svg width="40" height="14">
+      <line x1="2" y1="7" x2="38" y2="7" stroke="#666" stroke-width="1.3"/>
+      <polygon points="30,3 38,7 30,11" fill="#666"/>
+    </svg>
+    Relación FK (N → 1)
+  </div>
+</div>
+
+<p style="text-align:center;font-size:11px;color:#bbb;margin-top:20px;">
+  Hipstagram · Diagrama Entidad-Relación · PostgreSQL 15 · Basado en init.sql
+</p>
+
+</body>
+</html>
