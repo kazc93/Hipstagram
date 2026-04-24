@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Diagrama de Implementación — Hipstagram</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #111;
+    }
+
+    .subtitulo {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    .canvas-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    .canvas {
+      position: relative;
+      width: 900px;
+      height: 680px;
+    }
+
+    /* ── Cajas ── */
+    .box {
+      position: absolute;
+      background: #fff;
+      border: 1.5px solid #555;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.10);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8px 10px;
+    }
+
+    .box .box-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 3px;
+    }
+
+    .box .box-sub {
+      font-size: 10px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .box .box-port {
+      font-family: monospace;
+      font-size: 10px;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0 5px;
+      margin-top: 3px;
+      color: #444;
+    }
+
+    /* Estilos por capa */
+    .box-cliente  { border-color: #2196F3; }
+    .box-gateway  { border-color: #FF9800; }
+    .box-servicio { border-color: #4CAF50; }
+    .box-db       { border-color: #9C27B0; }
+    .box-s3       { border-color: #FFC107; }
+
+    /* Frame de despliegue (dashed) */
+    .frame-devops {
+      position: absolute;
+      border: 2px dashed #999;
+      border-radius: 6px;
+      background: transparent;
+    }
+
+    .frame-label {
+      position: absolute;
+      top: -11px;
+      left: 14px;
+      background: #fff;
+      padding: 0 6px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Etiquetas sobre las flechas */
+    .arrow-label {
+      position: absolute;
+      font-size: 10px;
+      color: #666;
+      background: #fff;
+      padding: 1px 5px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    /* Leyenda */
+    .leyenda {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .leyenda-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .leyenda-linea {
+      width: 28px;
+      height: 2px;
+    }
+
+    .leyenda-box {
+      width: 14px;
+      height: 14px;
+      border: 2px solid;
+      border-radius: 2px;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Diagrama de Implementación — Hipstagram</h1>
+<p class="subtitulo">Arquitectura de Microservicios · Angular · Node.js · PostgreSQL · AWS</p>
+
+<div class="canvas-wrapper">
+<div class="canvas">
+
+  <!-- ══ SVG: flechas y líneas ══ -->
+  <svg style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none;">
+    <defs>
+      <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+      </marker>
+      <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#2196F3"/>
+      </marker>
+    </defs>
+
+    <!-- 1. Angular → NGINX -->
+    <line x1="450" y1="85" x2="450" y2="135"
+          stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Etiqueta JWT -->
+    <!-- (posicionada como div, ver abajo) -->
+
+    <!-- 2. NGINX → barra horizontal de distribución -->
+    <line x1="450" y1="193" x2="450" y2="220"
+          stroke="#555" stroke-width="1.5"/>
+    <!-- Barra horizontal -->
+    <line x1="183" y1="220" x2="717" y2="220"
+          stroke="#555" stroke-width="1.5"/>
+    <!-- Bajadas a cada servicio -->
+    <line x1="183" y1="220" x2="183" y2="262"
+          stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="361" y1="220" x2="361" y2="262"
+          stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="539" y1="220" x2="539" y2="262"
+          stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="717" y1="220" x2="717" y2="262"
+          stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- 3. Servicios → barra de datos -->
+    <line x1="183" y1="355" x2="183" y2="400"
+          stroke="#555" stroke-width="1.5"/>
+    <line x1="361" y1="355" x2="361" y2="400"
+          stroke="#555" stroke-width="1.5"/>
+    <line x1="539" y1="355" x2="539" y2="400"
+          stroke="#555" stroke-width="1.5"/>
+    <line x1="717" y1="355" x2="717" y2="400"
+          stroke="#555" stroke-width="1.5"/>
+    <!-- Barra horizontal hacia datos -->
+    <line x1="183" y1="400" x2="717" y2="400"
+          stroke="#555" stroke-width="1.5"/>
+    <!-- Bajada a PostgreSQL -->
+    <line x1="272" y1="400" x2="272" y2="448"
+          stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+    <!-- Bajada a S3 -->
+    <line x1="618" y1="400" x2="618" y2="448"
+          stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Etiquetas en líneas -->
+    <text x="456" y="113" font-size="10" fill="#666" font-family="Arial">HTTP/HTTPS · JWT</text>
+    <text x="456" y="210" font-size="10" fill="#666" font-family="Arial">ruteo por path</text>
+    <text x="280" y="393" font-size="10" fill="#888" font-family="Arial">queries SQL</text>
+    <text x="544" y="393" font-size="10" fill="#888" font-family="Arial">upload imagen</text>
+
+  </svg>
+
+  <!-- ══ CAJAS ══ -->
+
+  <!-- Cliente Angular -->
+  <div class="box box-cliente" style="left:310px; top:25px; width:280px; height:60px;">
+    <div class="box-title">Navegador Web — Angular SPA</div>
+    <div class="box-sub">Login · Feed · Perfil · Búsqueda · Panel Admin</div>
+  </div>
+
+  <!-- NGINX Gateway -->
+  <div class="box box-gateway" style="left:310px; top:135px; width:280px; height:58px;">
+    <div class="box-title">API Gateway — NGINX</div>
+    <div class="box-sub">Reverse proxy · enruta por prefijo de ruta</div>
+    <div class="box-port">:3000</div>
+  </div>
+
+  <!-- Auth Service -->
+  <div class="box box-servicio" style="left:102px; top:262px; width:162px; height:93px;">
+    <div class="box-title">Auth Service</div>
+    <div class="box-port">:3001</div>
+    <div class="box-sub" style="margin-top:4px">
+      POST /login<br>
+      POST /register<br>
+      POST /refresh<br>
+      bcryptjs · JWT
+    </div>
+  </div>
+
+  <!-- Post Service -->
+  <div class="box box-servicio" style="left:280px; top:262px; width:162px; height:93px;">
+    <div class="box-title">Post Service</div>
+    <div class="box-port">:3002</div>
+    <div class="box-sub" style="margin-top:4px">
+      CRUD /posts<br>
+      POST /votos<br>
+      CRUD /comentarios<br>
+      multer · S3
+    </div>
+  </div>
+
+  <!-- Search Service -->
+  <div class="box box-servicio" style="left:458px; top:262px; width:162px; height:93px;">
+    <div class="box-title">Search Service</div>
+    <div class="box-port">:3003</div>
+    <div class="box-sub" style="margin-top:4px">
+      GET /busqueda<br>
+      GET /explorar<br>
+      <br>
+      búsqueda full-text
+    </div>
+  </div>
+
+  <!-- Admin Service -->
+  <div class="box box-servicio" style="left:636px; top:262px; width:162px; height:93px;">
+    <div class="box-title">Admin Service</div>
+    <div class="box-port">:3004</div>
+    <div class="box-sub" style="margin-top:4px">
+      GET /audit-logs<br>
+      CRUD /hashtags<br>
+      PUT /usuarios · /posts<br>
+      DoublyLinkedList
+    </div>
+  </div>
+
+  <!-- PostgreSQL -->
+  <div class="box box-db" style="left:162px; top:448px; width:220px; height:80px;">
+    <div class="box-title">PostgreSQL 15</div>
+    <div class="box-port">:5432</div>
+    <div class="box-sub" style="margin-top:4px">
+      usuarios · posts · votos<br>
+      comentarios · hashtags<br>
+      audit_logs · roles
+    </div>
+  </div>
+
+  <!-- AWS S3 -->
+  <div class="box box-s3" style="left:538px; top:448px; width:160px; height:80px;">
+    <div class="box-title">AWS S3</div>
+    <div class="box-sub" style="margin-top:4px">
+      Almacenamiento<br>
+      de imágenes de posts<br>
+      URL pública por archivo
+    </div>
+  </div>
+
+  <!-- Frame DevOps -->
+  <div class="frame-devops" style="left:45px; top:575px; width:810px; height:88px;">
+    <div class="frame-label">Infraestructura de Despliegue</div>
+
+    <!-- Docker Compose -->
+    <div class="box" style="position:absolute; left:40px; top:18px; width:230px; height:52px; border-style:solid; border-color:#555;">
+      <div class="box-title">Docker Compose (local)</div>
+      <div class="box-sub">frontend · nginx · auth · post · search · admin · db</div>
+    </div>
+
+    <!-- CI/CD Jenkins -->
+    <div class="box" style="position:absolute; left:320px; top:18px; width:210px; height:52px; border-style:solid; border-color:#555;">
+      <div class="box-title">Jenkins — CI/CD Pipeline</div>
+      <div class="box-sub">Build → Test → Docker push → AWS ECR</div>
+    </div>
+
+    <!-- AWS ECR -->
+    <div class="box" style="position:absolute; left:550px; top:18px; width:210px; height:52px; border-style:solid; border-color:#555;">
+      <div class="box-title">AWS ECR</div>
+      <div class="box-sub">Container Registry<br>Imágenes Docker en producción</div>
+    </div>
+
+  </div>
+
+</div>
+</div>
+
+<!-- Leyenda -->
+<div class="leyenda">
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#2196F3;"></div> Capa de Presentación
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#FF9800;"></div> API Gateway
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#4CAF50;"></div> Microservicios (Node.js)
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#9C27B0;"></div> Base de Datos
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#FFC107;"></div> Almacenamiento Cloud
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#999; border-style:dashed;"></div> Infraestructura / DevOps
+  </div>
+  <div class="leyenda-item">
+    <svg width="28" height="12"><line x1="0" y1="6" x2="20" y2="6" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/></svg>
+    Flujo de comunicación
+  </div>
+</div>
+
+<p style="text-align:center;font-size:11px;color:#bbb;margin-top:24px;">
+  Hipstagram · Arquitectura de Microservicios · Angular 21 + Node.js + PostgreSQL 15 + AWS
+</p>
+
+</body>
+</html>

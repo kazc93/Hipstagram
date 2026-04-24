@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Diagrama de Seguridad — Hipstagram</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #111;
+    }
+
+    .subtitulo {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    .canvas-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ── Cajas de actores ── */
+    .actor-box {
+      position: absolute;
+      background: #fff;
+      border: 1.5px solid #555;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.10);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8px 10px;
+      width: 148px;
+      height: 52px;
+      box-sizing: border-box;
+    }
+
+    .actor-box .box-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #111;
+      line-height: 1.3;
+    }
+
+    .actor-box .box-sub {
+      font-size: 9px;
+      color: #666;
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    .actor-usuario  { border-color: #2196F3; }
+    .actor-gateway  { border-color: #FF9800; }
+    .actor-auth     { border-color: #4CAF50; }
+    .actor-micro    { border-color: #4CAF50; }
+
+    /* Etiquetas de sección */
+    .section-label {
+      position: absolute;
+      font-size: 10px;
+      font-weight: bold;
+      color: #999;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: #fff;
+      padding: 0 6px;
+    }
+
+    /* Etiquetas sobre flechas */
+    .arrow-label {
+      position: absolute;
+      font-size: 10px;
+      color: #444;
+      background: #fff;
+      padding: 1px 5px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      white-space: nowrap;
+      line-height: 1.5;
+    }
+
+    /* Leyenda */
+    .leyenda {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .leyenda-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .leyenda-box {
+      width: 14px;
+      height: 14px;
+      border: 2px solid;
+      border-radius: 2px;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Diagrama de Seguridad — Flujo de Autenticación y Autorización</h1>
+<p class="subtitulo">JWT · bcryptjs · RBAC · API Gateway como único punto de entrada</p>
+
+<div class="canvas-wrapper">
+<div style="position:relative; width:900px; height:660px;">
+
+  <!-- ══ SVG: lifelines, flechas y separadores ══ -->
+  <svg style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none;">
+    <defs>
+      <!-- Punta de flecha rellena (mensajes normales) -->
+      <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+      </marker>
+      <!-- Punta de flecha abierta (respuestas) -->
+      <marker id="arr-open" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polyline points="0 0, 10 3.5, 0 7" fill="none" stroke="#555" stroke-width="1.2"/>
+      </marker>
+      <!-- Punta de flecha azul -->
+      <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#2196F3"/>
+      </marker>
+      <!-- Punta de flecha naranja -->
+      <marker id="arr-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#FF9800"/>
+      </marker>
+      <!-- Punta de flecha verde -->
+      <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#4CAF50"/>
+      </marker>
+      <!-- Punta de flecha abierta azul (respuesta) -->
+      <marker id="arr-open-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polyline points="0 0, 10 3.5, 0 7" fill="none" stroke="#2196F3" stroke-width="1.2"/>
+      </marker>
+    </defs>
+
+    <!-- ── Lifelines punteadas (debajo de los actores) ── -->
+    <!-- Usuario: centro x=100 -->
+    <line x1="100" y1="72" x2="100" y2="640"
+          stroke="#2196F3" stroke-width="1" stroke-dasharray="5,4" opacity="0.5"/>
+    <!-- API Gateway: centro x=330 -->
+    <line x1="330" y1="72" x2="330" y2="640"
+          stroke="#FF9800" stroke-width="1" stroke-dasharray="5,4" opacity="0.5"/>
+    <!-- Auth Service: centro x=560 -->
+    <line x1="560" y1="72" x2="560" y2="640"
+          stroke="#4CAF50" stroke-width="1" stroke-dasharray="5,4" opacity="0.5"/>
+    <!-- Post Service: centro x=790 -->
+    <line x1="790" y1="72" x2="790" y2="640"
+          stroke="#4CAF50" stroke-width="1" stroke-dasharray="5,4" opacity="0.5"/>
+
+    <!-- ══ FLUJO 1: Login ══ -->
+
+    <!-- Línea separadora superior de sección 1 -->
+    <line x1="30" y1="110" x2="870" y2="110"
+          stroke="#ccc" stroke-width="1" stroke-dasharray="6,4"/>
+
+    <!-- 1. Usuario → API Gateway: POST /api/auth/login -->
+    <line x1="108" y1="140" x2="318" y2="140"
+          stroke="#2196F3" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+
+    <!-- 2. API Gateway → Auth Service: Enruta petición -->
+    <line x1="338" y1="190" x2="548" y2="190"
+          stroke="#FF9800" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+
+    <!-- 3. Auth Service → Auth Service: Valida credenciales (loop self) -->
+    <!-- Flecha en L hacia la derecha y vuelve -->
+    <path d="M 560 235 L 620 235 L 620 265 L 562 265"
+          fill="none" stroke="#4CAF50" stroke-width="1.5" marker-end="url(#arr-green)"/>
+
+    <!-- 4. Auth Service → API Gateway: Access Token JWT + Refresh Token (respuesta) -->
+    <line x1="548" y1="305" x2="338" y2="305"
+          stroke="#4CAF50" stroke-width="1.5" stroke-dasharray="7,3" marker-end="url(#arr-open)"/>
+
+    <!-- 5. API Gateway → Usuario: Devuelve tokens (respuesta) -->
+    <line x1="318" y1="355" x2="108" y2="355"
+          stroke="#FF9800" stroke-width="1.5" stroke-dasharray="7,3" marker-end="url(#arr-open)"/>
+
+    <!-- ══ Separador de secciones ══ -->
+    <line x1="30" y1="400" x2="870" y2="400"
+          stroke="#999" stroke-width="1.2" stroke-dasharray="8,5"/>
+
+    <!-- ══ FLUJO 2: Petición autenticada ══ -->
+
+    <!-- 6. Usuario → API Gateway: GET /api/posts -->
+    <line x1="108" y1="440" x2="318" y2="440"
+          stroke="#2196F3" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+
+    <!-- 7. API Gateway → API Gateway: Valida firma JWT (self-loop) -->
+    <path d="M 330 480 L 390 480 L 390 510 L 332 510"
+          fill="none" stroke="#FF9800" stroke-width="1.5" marker-end="url(#arr-open)"/>
+
+    <!-- 8. API Gateway → Post Service: Enruta con usuario decodificado -->
+    <line x1="338" y1="545" x2="778" y2="545"
+          stroke="#FF9800" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+
+    <!-- 9. Post Service → API Gateway: HTTP 200 + datos (respuesta) -->
+    <line x1="778" y1="590" x2="338" y2="590"
+          stroke="#4CAF50" stroke-width="1.5" stroke-dasharray="7,3" marker-end="url(#arr-open)"/>
+
+    <!-- 10. API Gateway → Usuario: Entrega respuesta (respuesta) -->
+    <line x1="318" y1="630" x2="108" y2="630"
+          stroke="#FF9800" stroke-width="1.5" stroke-dasharray="7,3" marker-end="url(#arr-open)"/>
+
+  </svg>
+
+  <!-- ══ ACTORES (cajas superiores) ══ -->
+
+  <!-- Usuario -->
+  <div class="actor-box actor-usuario" style="left:26px; top:10px;">
+    <div class="box-title">Usuario</div>
+    <div class="box-sub">Navegador Web</div>
+  </div>
+
+  <!-- API Gateway -->
+  <div class="actor-box actor-gateway" style="left:256px; top:10px;">
+    <div class="box-title">API Gateway</div>
+    <div class="box-sub">NGINX · :3000</div>
+  </div>
+
+  <!-- Auth Service -->
+  <div class="actor-box actor-auth" style="left:486px; top:10px;">
+    <div class="box-title">Auth Service</div>
+    <div class="box-sub">:3001 · bcryptjs · JWT</div>
+  </div>
+
+  <!-- Post Service -->
+  <div class="actor-box actor-micro" style="left:716px; top:10px;">
+    <div class="box-title">Post Service</div>
+    <div class="box-sub">:3002 · Microservicio</div>
+  </div>
+
+  <!-- ══ Etiqueta sección 1 ══ -->
+  <div class="section-label" style="left:30px; top:101px;">Flujo 1: Login Inicial</div>
+
+  <!-- ══ Etiquetas de mensajes — Flujo 1 ══ -->
+
+  <!-- 1 -->
+  <div class="arrow-label" style="left:130px; top:125px;">
+    POST /api/auth/login &nbsp;{ username, password }
+  </div>
+
+  <!-- 2 -->
+  <div class="arrow-label" style="left:348px; top:175px;">
+    Enruta petición de autenticación
+  </div>
+
+  <!-- 3 -->
+  <div class="arrow-label" style="left:568px; top:240px;">
+    Valida credenciales<br>+ bcrypt hash
+  </div>
+
+  <!-- 4 -->
+  <div class="arrow-label" style="left:348px; top:289px;">
+    Access Token JWT + Refresh Token
+  </div>
+
+  <!-- 5 -->
+  <div class="arrow-label" style="left:130px; top:339px;">
+    Devuelve tokens JWT al cliente
+  </div>
+
+  <!-- ══ Etiqueta separador ══ -->
+  <div class="section-label" style="left:30px; top:391px; color:#777;">Flujo 2: Petición Autenticada</div>
+
+  <!-- ══ Etiquetas de mensajes — Flujo 2 ══ -->
+
+  <!-- 6 -->
+  <div class="arrow-label" style="left:130px; top:424px;">
+    GET /api/posts &nbsp; Authorization: Bearer &lt;token&gt;
+  </div>
+
+  <!-- 7 -->
+  <div class="arrow-label" style="left:340px; top:484px;">
+    Valida firma del<br>token JWT
+  </div>
+
+  <!-- 8 -->
+  <div class="arrow-label" style="left:390px; top:529px;">
+    Enruta petición con usuario decodificado
+  </div>
+
+  <!-- 9 -->
+  <div class="arrow-label" style="left:420px; top:573px;">
+    Respuesta HTTP 200 + datos
+  </div>
+
+  <!-- 10 -->
+  <div class="arrow-label" style="left:130px; top:615px;">
+    Entrega respuesta al cliente
+  </div>
+
+</div>
+</div>
+
+<!-- Leyenda -->
+<div class="leyenda">
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#2196F3;"></div> Usuario / Cliente
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#FF9800;"></div> API Gateway (NGINX)
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-box" style="border-color:#4CAF50;"></div> Microservicios (Auth · Post)
+  </div>
+  <div class="leyenda-item">
+    <svg width="52" height="14" style="overflow:visible">
+      <defs>
+        <marker id="arr-leg" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"/>
+        </marker>
+      </defs>
+      <line x1="0" y1="7" x2="42" y2="7" stroke="#555" stroke-width="1.5" marker-end="url(#arr-leg)"/>
+    </svg>
+    Mensaje / Petición
+  </div>
+  <div class="leyenda-item">
+    <svg width="52" height="14" style="overflow:visible">
+      <defs>
+        <marker id="arr-leg2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polyline points="0 0, 8 3, 0 6" fill="none" stroke="#555" stroke-width="1.2"/>
+        </marker>
+      </defs>
+      <line x1="0" y1="7" x2="42" y2="7" stroke="#555" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-leg2)"/>
+    </svg>
+    Respuesta
+  </div>
+  <div class="leyenda-item">
+    <svg width="38" height="14">
+      <line x1="0" y1="7" x2="38" y2="7" stroke="#aaa" stroke-width="1" stroke-dasharray="4,3"/>
+    </svg>
+    Lifeline (tiempo)
+  </div>
+</div>
+
+<p style="text-align:center;font-size:11px;color:#bbb;margin-top:24px;">
+  Hipstagram · Diagrama de Secuencia UML · Seguridad: JWT + bcryptjs + RBAC + API Gateway
+</p>
+
+</body>
+</html>
