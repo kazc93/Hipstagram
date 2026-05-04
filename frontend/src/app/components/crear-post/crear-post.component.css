@@ -4,6 +4,7 @@
   margin-bottom: 14px;
 }
 
+<<<<<<< HEAD
 /* Caja inicial */
 .caja-inicial {
   display: flex;
@@ -17,23 +18,49 @@
 }
 
 .caja-inicial:hover { background: #f5f5f5; }
+=======
+/* ─── Caja inicial ────────────────────────────────── */
+.caja-inicial {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #dbdbdb;
+  cursor: pointer;
+  gap: 12px;
+  transition: border-color .15s;
+}
+
+.caja-inicial:hover { border-color: #a8a8a8; }
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
 
 .avatar-placeholder {
   width: 38px;
   height: 38px;
+<<<<<<< HEAD
   background: #0066cc;
   color: #fff;
+=======
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: white;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+<<<<<<< HEAD
   font-weight: bold;
+=======
+  font-weight: 700;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   font-size: 1rem;
   flex-shrink: 0;
 }
 
 .btn-placeholder {
   flex: 1;
+<<<<<<< HEAD
   border: 1px solid #ccc;
   background: #f5f5f5;
   color: #888;
@@ -45,12 +72,32 @@
 }
 
 .btn-placeholder:hover { background: #eee; }
+=======
+  border: 1px solid #dbdbdb;
+  background: #fafafa;
+  color: #8e8e8e;
+  padding: 9px 16px;
+  border-radius: 20px;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.btn-placeholder:hover { background: #efefef; }
+
+.icono-foto { color: #8e8e8e; font-size: 22px; }
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
 
 /* Modal overlay */
 .overlay-bg {
   position: fixed;
   inset: 0;
+<<<<<<< HEAD
   background: rgba(0,0,0,0.5);
+=======
+  background: rgba(0,0,0,0.65);
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   z-index: 1500;
 }
 
@@ -60,6 +107,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+<<<<<<< HEAD
   background: #fff;
   width: 90%;
   max-width: 560px;
@@ -73,6 +121,22 @@
 .header-form {
   padding: 14px 18px;
   border-bottom: 1px solid #eee;
+=======
+  background: #ffffff;
+  width: 90%;
+  max-width: 540px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header-form {
+  padding: 14px 16px;
+  border-bottom: 1px solid #dbdbdb;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -81,6 +145,7 @@
 .header-form h3 {
   margin: 0;
   font-size: 16px;
+<<<<<<< HEAD
   font-weight: bold;
   color: #333;
 }
@@ -90,10 +155,24 @@
   border: 1px solid #ccc;
   width: 28px;
   height: 28px;
+=======
+  font-weight: 700;
+  color: #262626;
+  flex: 1;
+  text-align: center;
+}
+
+.btn-cerrar {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+<<<<<<< HEAD
   color: #555;
   cursor: pointer;
   font-size: 16px;
@@ -105,17 +184,40 @@
   padding: 8px 18px;
   background: #d4edda;
   color: #155724;
+=======
+  color: #262626;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background .15s;
+}
+
+.btn-cerrar:hover { background: #f0f0f0; }
+
+.mensaje-alerta {
+  padding: 10px 16px;
+  background: #edfaed;
+  color: #1a8917;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   font-size: 13px;
 }
 
 .mensaje-alerta.error {
+<<<<<<< HEAD
   background: #f8d7da;
   color: #721c24;
+=======
+  background: #fff0f1;
+  color: #ed4956;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
 }
 
 /* Cuerpo del form */
 .cuerpo-form {
+<<<<<<< HEAD
   padding: 18px;
+=======
+  padding: 16px;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -130,6 +232,7 @@
 
 .preview-container {
   width: 100%;
+<<<<<<< HEAD
   max-height: 240px;
   overflow: hidden;
   background: #f5f5f5;
@@ -138,17 +241,32 @@
   align-items: center;
   border: 1px solid #ccc;
   border-radius: 4px;
+=======
+  max-height: 280px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fafafa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #dbdbdb;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
 }
 
 .preview-container img {
   max-width: 100%;
+<<<<<<< HEAD
   max-height: 240px;
+=======
+  max-height: 280px;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   object-fit: contain;
 }
 
 .btn-archivo {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   gap: 5px;
   background: #f5f5f5;
   border: 1px solid #ccc;
@@ -177,10 +295,44 @@
 }
 
 .inputs-section textarea:focus { border-color: #0066cc; }
+=======
+  gap: 6px;
+  background: #0095f6;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background .15s;
+}
+
+.btn-archivo:hover { background: #1877f2; }
+
+.icono-foto-caja { color: #8e8e8e; font-size: 20px; }
+
+.inputs-section textarea {
+  width: 100%;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  outline: none;
+  resize: none;
+  font-size: 14px;
+  padding: 10px 12px;
+  background: #fafafa;
+  color: #262626;
+  transition: border-color .15s;
+}
+
+.inputs-section textarea::placeholder { color: #8e8e8e; }
+.inputs-section textarea:focus { border-color: #a8a8a8; background: #fff; }
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
 
 .hashtag-input-wrapper {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 0 10px;
@@ -189,12 +341,25 @@
 
 .hashtag-input-wrapper:focus-within { border-color: #0066cc; }
 .hashtag-icon { color: #888; font-size: 1rem; }
+=======
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  padding: 0 10px;
+  background: #fafafa;
+  transition: border-color .15s;
+}
+
+.hashtag-input-wrapper:focus-within { border-color: #a8a8a8; background: #fff; }
+
+.hashtag-icon { color: #8e8e8e; font-size: 1rem; }
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
 
 .hashtag-input-wrapper input {
   flex: 1;
   border: none;
   outline: none;
   padding: 9px 8px;
+<<<<<<< HEAD
   font-size: 13px;
   background: transparent;
   color: #333;
@@ -204,6 +369,19 @@
 .footer-form {
   padding: 12px 18px;
   border-top: 1px solid #eee;
+=======
+  font-size: 14px;
+  background: transparent;
+  color: #262626;
+}
+
+.hashtag-input-wrapper input::placeholder { color: #8e8e8e; }
+
+/* ─── Footer del form ─────────────────────────────── */
+.footer-form {
+  padding: 12px 16px;
+  border-top: 1px solid #dbdbdb;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   display: flex;
   justify-content: flex-end;
 }
@@ -211,6 +389,7 @@
 .btn-publicar {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   gap: 5px;
   background: #0066cc;
   color: #fff;
@@ -226,5 +405,23 @@
 
 .btn-publicar:disabled {
   opacity: 0.5;
+=======
+  gap: 6px;
+  background: #0095f6;
+  color: white;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background .15s;
+}
+
+.btn-publicar:hover:not(:disabled) { background: #1877f2; }
+
+.btn-publicar:disabled {
+  background: #b2dffc;
+>>>>>>> 55e5398 (feat: rediseño UI estilo Instagram + diagrama de implementación)
   cursor: not-allowed;
 }
